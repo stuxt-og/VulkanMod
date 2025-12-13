@@ -2,12 +2,17 @@ package net.vulkanmod.config.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.vulkanmod.config.gui.GuiRenderer;
 import net.vulkanmod.config.option.CyclingOption;
+import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.util.ColorUtil;
 import org.joml.Matrix4f;
 
@@ -28,7 +33,7 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
 
     @Override
     protected int getYImage(boolean hovered) {
-        return  0;
+        return 0;
     }
 
     public void renderControls(double mouseX, double mouseY) {
@@ -93,12 +98,12 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
     }
 
     @Override
-    public void setFocused(boolean bl) {
+    public void method_25365(boolean bl) {
         this.focused = bl;
     }
 
     @Override
-    public boolean isFocused() {
+    public boolean method_25370() {
         return this.focused;
     }
 
@@ -125,42 +130,49 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
 
         void renderButton(PoseStack matrices, double mouseX, double mouseY) {
             Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
+            BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.field_27380,
+                                                           DefaultVertexFormat.field_1576);
 
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
             float f = this.isHovered(mouseX, mouseY) && this.active ? 5.0f : 4.5f;
 
-            Matrix4f matrix4f = matrices.last().pose();
+            Matrix4f matrix4f = matrices.last().method_23761();
 
-            RenderSystem.setShader(GameRenderer::getPositionShader);
-            RenderSystem.enableBlend();
+            VRenderSystem.enableBlend();
 
-            if(this.isHovered(mouseX, mouseY) && this.active)
+            if (this.isHovered(mouseX, mouseY) && this.active)
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            else if(this.active)
+            else if (this.active)
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 0.8f);
             else
                 RenderSystem.setShaderColor(0.3f, 0.3f, 0.3f, 0.8f);
 
+            int color = 0xFFFFFFFF;
             float h = f;
             float w = f - 1.0f;
             float yC = y + height * 0.5f;
             float xC = x + width * 0.5f;
             if (this.direction == Direction.LEFT) {
-                bufferBuilder.addVertex(matrix4f, xC - w, yC, 0);
-                bufferBuilder.addVertex(matrix4f, xC + w, yC + h, 0);
-                bufferBuilder.addVertex(matrix4f, xC + w, yC - h, 0);
-            } else {
-                bufferBuilder.addVertex(matrix4f, xC + w, yC, 0);
-                bufferBuilder.addVertex(matrix4f, xC - w, yC - h, 0);
-                bufferBuilder.addVertex(matrix4f, xC - w, yC + h, 0);
+                bufferBuilder.method_22918(matrix4f, xC - w, yC, 0)
+                             .setColor(color);
+                bufferBuilder.method_22918(matrix4f, xC + w, yC + h, 0)
+                             .setColor(color);
+                bufferBuilder.method_22918(matrix4f, xC + w, yC - h, 0)
+                             .setColor(color);
+            }
+            else {
+                bufferBuilder.method_22918(matrix4f, xC + w, yC, 0)
+                             .setColor(color);
+                bufferBuilder.method_22918(matrix4f, xC - w, yC - h, 0)
+                             .setColor(color);
+                bufferBuilder.method_22918(matrix4f, xC - w, yC + h, 0)
+                             .setColor(color);
             }
 
-            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+            RenderType.method_51784().method_60895(bufferBuilder.buildOrThrow());
 
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
         }
 
         enum Direction {

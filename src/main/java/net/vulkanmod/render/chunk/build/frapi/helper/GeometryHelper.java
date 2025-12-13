@@ -18,12 +18,12 @@ package net.vulkanmod.render.chunk.build.frapi.helper;
 
 import static net.minecraft.util.Mth.equal;
 
-import org.joml.Vector3f;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.AxisDirection;
+import org.joml.Vector3fc;
 
 /**
  * Static routines of general utility for renderer implementations.
@@ -172,13 +172,11 @@ public abstract class GeometryHelper {
 
 	/**
 	 * Identifies the face to which the quad is most closely aligned.
-	 * This mimics the value that {@link BakedQuad#getDirection()} returns, and is
-	 * used in the vanilla renderer for all diffuse lighting.
 	 *
 	 * <p>Derived from the quad face normal and expects convex quads with all points co-planar.
 	 */
 	public static Direction lightFace(QuadView quad) {
-		final Vector3f normal = quad.faceNormal();
+		final Vector3fc normal = quad.faceNormal();
 		switch (GeometryHelper.longestAxis(normal)) {
 		case X:
 			return normal.x() > 0 ? Direction.EAST : Direction.WEST;
@@ -216,7 +214,7 @@ public abstract class GeometryHelper {
 	/**
 	 * @see #longestAxis(float, float, float)
 	 */
-	public static Axis longestAxis(Vector3f vec) {
+	public static Axis longestAxis(Vector3fc vec) {
 		return longestAxis(vec.x(), vec.y(), vec.z());
 	}
 

@@ -1,13 +1,13 @@
 package net.vulkanmod.mixin.debug;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.vulkanmod.render.chunk.WorldRenderer;
 import net.vulkanmod.vulkan.SystemInfo;
 import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.device.Device;
 import net.vulkanmod.vulkan.memory.MemoryManager;
+import org.apache.logging.log4j.core.pattern.TextRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +35,7 @@ public abstract class DebugScreenOverlayM {
 
     @Shadow
     @Final
-    private Font font;
+    private TextRenderer font;
 
     @Shadow
     protected abstract List<String> getGameInformation();

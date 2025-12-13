@@ -1,6 +1,6 @@
 package net.vulkanmod.vulkan.pass;
 
-import net.vulkanmod.gl.VkGlTexture;
+import com.mojang.blaze3d.textures.GpuTexture;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkCommandBuffer;
 
@@ -22,7 +22,7 @@ public interface MainPass {
 
     default void bindAsTexture() {}
 
-    default VkGlTexture getColorAttachment() {
-        throw new UnsupportedOperationException();
+    default GpuTexture getColorAttachment() {
+        return null;
     }
 }

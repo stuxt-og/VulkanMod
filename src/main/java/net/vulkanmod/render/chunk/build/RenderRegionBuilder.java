@@ -1,10 +1,15 @@
 package net.vulkanmod.render.chunk.build;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceLinkedOpenHashMap;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -20,7 +25,7 @@ public class RenderRegionBuilder {
     private static final int MAX_CACHE_ENTRIES = 256;
     private final Long2ReferenceLinkedOpenHashMap<LevelChunk> levelChunkCache = new Long2ReferenceLinkedOpenHashMap<>(MAX_CACHE_ENTRIES);
 
-    public RenderRegion createRegion(Level level, int secX, int secY, int secZ) {
+    public RenderRegion createRegion(ClientLevel level, int secX, int secY, int secZ) {
         LevelChunk levelChunk = getLevelChunk(level, secX, secZ);
         var sections = levelChunk.getSections();
         LevelChunkSection section = sections[level.getSectionIndexFromSectionY(secY)];
@@ -44,7 +49,7 @@ public class RenderRegionBuilder {
         long biomeZoomSeed = BiomeManagerExtended.of(level.getBiomeManager()).getBiomeZoomSeed();
         BiomeData biomeData = new BiomeData(biomeZoomSeed, minSecX, minSecY, minSecZ);
 
-        final int minHeightSec = level.getMinBuildHeight() >> 4;
+        final int minHeightSec = level.getMinY() >> 4;
         for (int x = minSecX; x <= maxSecX; ++x) {
             for (int z = minSecZ; z <= maxSecZ; ++z) {
                 LevelChunk levelChunk1 = getLevelChunk(level, x, z);
@@ -74,7 +79,7 @@ public class RenderRegionBuilder {
         return new RenderRegion(level, secX, secY, secZ, blockData, lightData, biomeData, blockEntityMap);
     }
 
-    private DataLayer[] getSectionDataLayers(Level level, SectionPos pos) {
+    private DataLayer[] getSectionDataLayers(ClientLevel level, SectionPos pos) {
         DataLayer[] dataLayers = new DataLayer[2];
 
         DataLayer blockDataLayer;
@@ -99,7 +104,7 @@ public class RenderRegionBuilder {
         return dataLayers;
     }
 
-    private LevelChunk getLevelChunk(Level level, int x, int z) {
+    private LevelChunk getLevelChunk(ClientLevel level, int x, int z) {
         long l = ChunkPos.asLong(x, z);
         LevelChunk chunk = this.levelChunkCache.getAndMoveToFirst(l);
 

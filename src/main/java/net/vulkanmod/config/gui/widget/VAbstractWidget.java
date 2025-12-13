@@ -1,10 +1,10 @@
 package net.vulkanmod.config.gui.widget;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.class_3417;
 import net.vulkanmod.config.gui.GuiElement;
 import net.vulkanmod.config.gui.GuiRenderer;
 import net.vulkanmod.vulkan.util.ColorUtil;
@@ -61,7 +61,7 @@ public abstract class VAbstractWidget extends GuiElement {
             if (this.isValidClickButton(button)) {
                 boolean bl = this.clicked(mX, mY);
                 if (bl) {
-                    this.playDownSound(Minecraft.getInstance().getSoundManager());
+                    this.playDownSound(Minecraft.getInstance().method_1483());
                     this.onClick(mX, mY);
                     return true;
                 }
@@ -105,7 +105,7 @@ public abstract class VAbstractWidget extends GuiElement {
     }
 
     public void playDownSound(SoundManager soundManager) {
-        soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        soundManager.play(SimpleSoundInstance.forUI(class_3417.UI_BUTTON_CLICK, 1.0F));
     }
 
     public Component getTooltip() {

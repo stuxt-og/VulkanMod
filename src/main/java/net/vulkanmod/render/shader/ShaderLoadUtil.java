@@ -3,6 +3,7 @@ package net.vulkanmod.render.shader;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.shaders.ShaderType;
 import net.minecraft.resources.ResourceLocation;
 import net.vulkanmod.vulkan.shader.Pipeline;
 import net.vulkanmod.vulkan.shader.SPIRVUtils;
@@ -108,6 +109,32 @@ public abstract class ShaderLoadUtil {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public static String getShaderSource(ResourceLocation resourceLocation, ShaderType type) {
+        String shaderExtension = switch (type) {
+            case VERTEX -> ".vsh";
+            case FRAGMENT -> ".fsh";
+        };
+
+        String basePath = "%s/shaders/%s".formatted(RESOURCES_PATH, resourceLocation.getPath());
+        String shaderFile = "%s%s".formatted(basePath, shaderExtension);
+
+        InputStream stream;
+        try {
+            stream = getInputStream(shaderFile);
+
+            if (stream == null) {
+                return null;
+            }
+
+            String source = IOUtils.toString(new BufferedReader(new InputStreamReader(stream)));
+            stream.close();
+
+            return source;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getShaderSource(String basePath, String rendertype, String shaderName, SPIRVUtils.ShaderKind type) {

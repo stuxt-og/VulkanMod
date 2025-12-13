@@ -1,13 +1,13 @@
 package net.vulkanmod.mixin.wayland;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.class_3675;
 import net.vulkanmod.config.Platform;
 import org.lwjgl.glfw.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(InputConstants.class)
+@Mixin(class_3675.class)
 public class InputConstantsM {
     /**
      * @author

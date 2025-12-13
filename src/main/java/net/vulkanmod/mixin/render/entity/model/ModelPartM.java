@@ -20,7 +20,7 @@ import java.util.List;
 
 @Mixin(ModelPart.class)
 public abstract class ModelPartM {
-    @Shadow @Final private List<ModelPart.Cube> cubes;
+    @Shadow @Final private List<ModelPart.class_628> cubes;
 
     Vector3f normal = new Vector3f();
 
@@ -32,15 +32,15 @@ public abstract class ModelPartM {
 
     @Unique
     public void renderCubes(PoseStack.Pose pose, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-        Matrix4f matrix4f = pose.pose();
-        Matrix3f matrix3f = pose.normal();
+        Matrix4f matrix4f = pose.method_23761();
+        Matrix3f matrix3f = pose.method_23762();
 
         ExtendedVertexBuilder vertexBuilder = ExtendedVertexBuilder.of(vertexConsumer);
 
         if (vertexBuilder != null && vertexBuilder.canUseFastVertex()) {
             color = ColorUtil.RGBA.fromArgb32(color);
 
-            for (ModelPart.Cube cube : this.cubes) {
+            for (ModelPart.class_628 cube : this.cubes) {
                 ModelPartCubeMixed cubeMixed = (ModelPartCubeMixed)(cube);
                 CubeModel cubeModel = cubeMixed.getCubeModel();
 
@@ -49,22 +49,22 @@ public abstract class ModelPartM {
                 cubeModel.transformVertices(matrix4f);
 
                 for (ModelPart.Polygon polygon : polygons) {
-                    matrix3f.transform(this.normal.set(polygon.normal));
+                    matrix3f.transform(this.normal.set(polygon.comp_3185()));
                     this.normal.normalize();
 
                     int packedNormal = I32_SNorm.packNormal(normal.x(), normal.y(), normal.z());
 
-                    ModelPart.Vertex[] vertices = polygon.vertices;
+                    ModelPart.Vertex[] vertices = polygon.comp_3184();
 
                     for (ModelPart.Vertex vertex : vertices) {
-                        Vector3f pos = vertex.pos;
-                        vertexBuilder.vertex(pos.x(), pos.y(), pos.z(), color, vertex.u, vertex.v, overlay, light, packedNormal);
+                        Vector3f pos = vertex.comp_3186();
+                        vertexBuilder.vertex(pos.x(), pos.y(), pos.z(), color, vertex.comp_3187(), vertex.comp_3188(), overlay, light, packedNormal);
                     }
                 }
             }
         }
         else {
-            for (ModelPart.Cube cube : this.cubes) {
+            for (ModelPart.class_628 cube : this.cubes) {
                 ModelPartCubeMixed cubeMixed = (ModelPartCubeMixed)(cube);
                 CubeModel cubeModel = cubeMixed.getCubeModel();
 
@@ -73,14 +73,14 @@ public abstract class ModelPartM {
                 cubeModel.transformVertices(matrix4f);
 
                 for (ModelPart.Polygon polygon : polygons) {
-                    matrix3f.transform(this.normal.set(polygon.normal));
+                    matrix3f.transform(this.normal.set(polygon.comp_3185()));
                     this.normal.normalize();
 
-                    ModelPart.Vertex[] vertices = polygon.vertices;
+                    ModelPart.Vertex[] vertices = polygon.comp_3184();
 
                     for (ModelPart.Vertex vertex : vertices) {
-                        Vector3f pos = vertex.pos;
-                        vertexConsumer.addVertex(pos.x(), pos.y(), pos.z(), color, vertex.u, vertex.v, overlay, light,
+                        Vector3f pos = vertex.comp_3186();
+                        vertexConsumer.method_23919(pos.x(), pos.y(), pos.z(), color, vertex.comp_3187(), vertex.comp_3188(), overlay, light,
                                               normal.x(), normal.y(), normal.z());
                     }
                 }

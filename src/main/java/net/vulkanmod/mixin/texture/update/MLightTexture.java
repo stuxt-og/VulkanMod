@@ -1,18 +1,21 @@
 package net.vulkanmod.mixin.texture.update;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.profiling.ProfilerFiller;
+import org.joml.Math;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.vulkanmod.gl.VkGlTexture;
 import net.vulkanmod.mixin.texture.image.NativeImageAccessor;
+import net.vulkanmod.render.engine.VkGpuTexture;
 import net.vulkanmod.render.texture.ImageUploadHelper;
 import net.vulkanmod.vulkan.queue.CommandPool;
 import org.joml.Vector3f;
@@ -31,15 +34,29 @@ public class MLightTexture {
     @Shadow private boolean updateLightTexture;
     @Shadow private float blockLightRedFlicker;
 
-    @Shadow @Final private DynamicTexture lightTexture;
-    @Shadow @Final private NativeImage lightPixels;
-
+    private DynamicTexture lightTexture;
+    private NativeImage lightPixels;
 
     private Vector3f[] tempVecs;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(GameRenderer gameRenderer, Minecraft minecraft, CallbackInfo ci) {
+        initLightMap();
+
         this.tempVecs = new Vector3f[]{new Vector3f(), new Vector3f(), new Vector3f()};
+    }
+
+    private void initLightMap() {
+        this.lightTexture = new DynamicTexture("Light Texture", 16, 16, false);
+        this.lightPixels = this.lightTexture.getPixels();
+
+        for(int i = 0; i < 16; ++i) {
+            for(int j = 0; j < 16; ++j) {
+                this.lightPixels.setPixel(j, i, 0xFFFFFFFF);
+            }
+        }
+
+        this.lightTexture.upload();
     }
 
     /**
@@ -48,7 +65,7 @@ public class MLightTexture {
      */
     @Overwrite
     public void turnOnLightLayer() {
-        RenderSystem.setShaderTexture(2, this.lightTexture.getId());
+        RenderSystem.setShaderTexture(2, this.lightTexture.getTexture());
     }
 
     @SuppressWarnings("UnreachableCode")
@@ -57,7 +74,8 @@ public class MLightTexture {
         if (this.updateLightTexture) {
             this.updateLightTexture = false;
 
-            this.minecraft.getProfiler().push("lightTex");
+            ProfilerFiller profilerFiller = Profiler.get();
+            profilerFiller.push("lightTex");
 
             // TODO: Other mods might be changing lightmap behaviour, we can't be aware of that here
 
@@ -92,7 +110,7 @@ public class MLightTexture {
 
                 float gamma = this.minecraft.options.gamma().get().floatValue();
                 float darkenWorldAmount = this.renderer.getDarkenWorldAmount(partialTicks);
-                boolean forceBrightLightmap = clientLevel.effects().forceBrightLightmap();
+                boolean forceBrightLightmap = clientLevel.dimensionType().ultraWarm();
                 float ambientLight = clientLevel.dimensionType().ambientLight();
 
                 long ptr = ((NativeImageAccessor)(Object)this.lightPixels).getPixels();
@@ -159,12 +177,10 @@ public class MLightTexture {
                 this.lightTexture.upload();
 
                 try (MemoryStack stack = MemoryStack.stackPush()) {
-                    VkGlTexture.getTexture(this.lightTexture.getId()).getVulkanImage().readOnlyLayout(stack, commandBuffer.getHandle());
+                    VkGlTexture.getTexture(((VkGpuTexture)this.lightTexture.getTexture()).method_68427()).getVulkanImage().readOnlyLayout(stack, commandBuffer.getHandle());
                 }
 
-                ImageUploadHelper.INSTANCE.submitCommands();
-
-                this.minecraft.getProfiler().pop();
+                profilerFiller.pop();
             }
         }
 
@@ -180,7 +196,7 @@ public class MLightTexture {
     @Unique
     private float calculateDarknessScale(LivingEntity livingEntity, float f, float g) {
         float h = 0.45F * f;
-        return Math.max(0.0F, Mth.cos(((float)livingEntity.tickCount - g) * (float) Math.PI * 0.025F) * h);
+        return Math.max(0.0F, Math.cos(((float)livingEntity.tickCount - g) * (float) Math.PI * 0.025F) * h);
     }
 
     @Unique
@@ -190,7 +206,7 @@ public class MLightTexture {
 
     @Unique
     private static void clampColor(Vector3f vector3f) {
-        vector3f.set(Mth.clamp(vector3f.x, 0.0F, 1.0F), Mth.clamp(vector3f.y, 0.0F, 1.0F), Mth.clamp(vector3f.z, 0.0F, 1.0F));
+        vector3f.set(Math.clamp(vector3f.x, 0.0F, 1.0F), Math.clamp(vector3f.y, 0.0F, 1.0F), Math.clamp(vector3f.z, 0.0F, 1.0F));
     }
 
     @Unique
@@ -204,7 +220,7 @@ public class MLightTexture {
     private static float getBrightness(float ambientLight, int i) {
         float f = (float)i / 15.0F;
         float g = f / (4.0F - 3.0F * f);
-        return Mth.lerp(ambientLight, g, 1.0F);
+        return Math.lerp(ambientLight, g, 1.0F);
     }
 
 }

@@ -1,23 +1,31 @@
 package net.vulkanmod.render.sky;
 
-import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.buffers.BufferUsage;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.CloudStatus;
-import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.phys.Vec3;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.CloudStatus;
+import com.mojang.blaze3d.vertex.MeshData;
 import net.vulkanmod.render.PipelineManager;
 import net.vulkanmod.render.VBO;
+import net.vulkanmod.render.util.MathUtil;
+import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.shader.GraphicsPipeline;
 import net.vulkanmod.vulkan.util.ColorUtil;
 import org.apache.commons.lang3.Validate;
-import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
+import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 
@@ -57,12 +65,12 @@ public class CloudRenderer {
         this.cloudGrid = createCloudGrid(TEXTURE_LOCATION);
     }
 
-    public void renderClouds(ClientLevel level, PoseStack poseStack, Matrix4f modelView, Matrix4f projection, float ticks, float partialTicks, double camX, double camY, double camZ) {
-        float cloudHeight = level.effects().getCloudHeight();
+    public void renderClouds(ClientLevel level, float ticks, float partialTicks, double camX, double camY, double camZ) {
+        float cloudHeight = 192.0f;
 
-        if (Float.isNaN(cloudHeight)) {
-            return;
-        }
+//        if (Float.isNaN(cloudHeight)) {
+//            return;
+//        }
 
         Minecraft minecraft = Minecraft.getInstance();
 
@@ -110,7 +118,7 @@ public class CloudRenderer {
                 return;
             }
 
-            this.cloudBuffer = new VBO(VertexBuffer.Usage.STATIC);
+            this.cloudBuffer = new VBO(BufferUsage.STATIC_WRITE);
             this.cloudBuffer.upload(cloudsMesh);
         }
 
@@ -118,48 +126,61 @@ public class CloudRenderer {
             return;
         }
 
-        FogRenderer.levelFogColor();
-
         float xTranslation = (float) (centerX - (centerCellX * CELL_WIDTH));
         float yTranslation = (float) (centerY);
         float zTranslation = (float) (centerZ - (centerCellZ * CELL_WIDTH));
 
-        poseStack.pushPose();
-        poseStack.mulPose(modelView);
+        Renderer.getInstance().getMainPass().rebindMainTarget();
+
+        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushMatrix();
         poseStack.translate(-xTranslation, yTranslation, -zTranslation);
+        VRenderSystem.applyModelViewMatrix(poseStack);
+        VRenderSystem.calculateMVP();
 
         VRenderSystem.setModelOffset(-xTranslation, 0, -zTranslation);
 
-        Vec3 cloudColor = level.getCloudColor(partialTicks);
+        Vec3 cloudColor = Vec3.fromRGB24(level.getCloudColor(partialTicks));
         RenderSystem.setShaderColor((float) cloudColor.x, (float) cloudColor.y, (float) cloudColor.z, 0.8f);
 
         GraphicsPipeline pipeline = PipelineManager.getCloudsPipeline();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
+        VRenderSystem.enableBlend();
+        VRenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+        VRenderSystem.enableDepthTest();
+        VRenderSystem.depthFunc(GL11.GL_LEQUAL);
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
+        GlStateManager._colorMask(true, true, true, true);
+        GlStateManager._disablePolygonOffset();
+        VRenderSystem.setPolygonModeGL(GL11.GL_FILL);
+        VRenderSystem.setPrimitiveTopologyGL(GL11.GL_TRIANGLES);
 
         boolean fastClouds = this.prevCloudsType == CloudStatus.FAST;
         boolean insideClouds = yState == Y_INSIDE_CLOUDS;
         boolean disableCull = insideClouds || (fastClouds && centerY <= 0.0f);
 
         if (disableCull) {
-            RenderSystem.disableCull();
+            VRenderSystem.disableCull();
+        } else {
+            VRenderSystem.enableCull();
         }
 
         if (!fastClouds) {
-            RenderSystem.colorMask(false, false, false, false);
-            this.cloudBuffer.drawWithShader(poseStack.last().pose(), projection, pipeline);
+            VRenderSystem.colorMask(false, false, false, false);
+            this.cloudBuffer.bind(pipeline);
+            this.cloudBuffer.draw();
 
-            RenderSystem.colorMask(true, true, true, true);
+            VRenderSystem.colorMask(true, true, true, true);
         }
 
-        this.cloudBuffer.drawWithShader(poseStack.last().pose(), projection, pipeline);
 
-        RenderSystem.enableCull();
+        this.cloudBuffer.bind(pipeline);
+        this.cloudBuffer.draw();
+
+        poseStack.popMatrix();
+        VRenderSystem.enableCull();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         VRenderSystem.setModelOffset(0.0f, 0.0f, 0.0f);
-
-        poseStack.popPose();
     }
 
     public void resetBuffer() {
@@ -285,7 +306,7 @@ public class CloudRenderer {
                 int height = image.getHeight();
                 Validate.isTrue(width == height, "Image width and height must be the same");
 
-                int[] pixels = image.getPixelsRGBA();
+                int[] pixels = image.getPixelsABGR();
 
                 return new CloudGrid(pixels, width);
             }
@@ -370,8 +391,8 @@ public class CloudRenderer {
         }
 
         int getWrappedIdx(int x, int z) {
-            x = Math.floorMod(x, this.width);
-            z = Math.floorMod(z, this.width);
+            x = MathUtil.floorMod(x, this.width);
+            z = MathUtil.floorMod(z, this.width);
 
             return this.getIdx(x, z);
         }

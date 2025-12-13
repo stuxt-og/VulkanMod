@@ -1,10 +1,10 @@
 package net.vulkanmod.config.gui;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.joml.Math;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.util.Mth;
 import net.vulkanmod.config.gui.widget.OptionWidget;
 import net.vulkanmod.config.gui.widget.VAbstractWidget;
 import net.vulkanmod.config.option.Option;
@@ -89,7 +89,7 @@ public class VOptionList extends GuiElement {
     }
 
     public void setScrollAmount(double d) {
-        this.scrollAmount = (float) Mth.clamp(d, 0.0, this.getMaxScroll());
+        this.scrollAmount = (float) Math.clamp(d, 0.0, this.getMaxScroll());
     }
 
     private int getItemCount() {
@@ -110,7 +110,7 @@ public class VOptionList extends GuiElement {
             Entry entry = this.getEntryAtPos(mouseX, mouseY);
             if (entry != null && entry.mouseClicked(mouseX, mouseY, button)) {
                 setFocused(entry);
-                entry.setFocused(true);
+                entry.method_25365(true);
                 return true;
             }
 
@@ -125,7 +125,7 @@ public class VOptionList extends GuiElement {
             Entry entry = this.getEntryAtPos(mouseX, mouseY);
             if (entry != null) {
                 if (entry.mouseReleased(mouseX, mouseY, button)) {
-                    entry.setFocused(false);
+                    entry.method_25365(false);
                     setFocused(null);
                     return true;
                 }
@@ -213,13 +213,12 @@ public class VOptionList extends GuiElement {
         // Scroll bar
         int maxScroll = this.getMaxScroll();
         if (maxScroll > 0) {
-            RenderSystem.enableBlend();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            GlStateManager._enableBlend();
 
             int height = this.getHeight();
             int totalLength = this.getTotalLength();
             int barHeight = (int) ((float) (height * height) / totalLength);
-            barHeight = Mth.clamp(barHeight, 32, height - 8);
+            barHeight = Math.clamp(barHeight, 32, height - 8);
 
             int scrollAmount = (int) this.getScrollAmount();
             int barY = scrollAmount * (height - barHeight) / maxScroll + this.getY();
@@ -273,8 +272,6 @@ public class VOptionList extends GuiElement {
 
             rowTop += entry.getTotalHeight();
         }
-
-        GuiRenderer.flush();
     }
 
     private Entry getEntry(int j) {
@@ -326,13 +323,13 @@ public class VOptionList extends GuiElement {
         }
 
         @Override
-        public boolean isFocused() {
+        public boolean method_25370() {
             return false;
         }
 
         @Override
-        public void setFocused(boolean bl) {
-            widget.setFocused(bl);
+        public void method_25365(boolean bl) {
+            widget.method_25365(bl);
         }
     }
 }

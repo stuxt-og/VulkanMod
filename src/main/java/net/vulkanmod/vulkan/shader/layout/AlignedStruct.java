@@ -11,6 +11,10 @@ public abstract class AlignedStruct {
     protected int size;
 
     protected AlignedStruct(List<Uniform.Info> infoList, int size) {
+        if (size <= 0) {
+            throw new IllegalArgumentException("Struct size cannot be <= 0");
+        }
+
         this.size = size;
 
         if (infoList == null)

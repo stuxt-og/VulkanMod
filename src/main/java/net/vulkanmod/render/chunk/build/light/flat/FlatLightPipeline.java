@@ -1,11 +1,11 @@
 package net.vulkanmod.render.chunk.build.light.flat;
 
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.vulkanmod.render.chunk.util.SimpleDirection;
 import net.vulkanmod.render.model.quad.ModelQuadView;
 import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.client.renderer.LightTexture;
 import net.vulkanmod.render.chunk.build.light.LightPipeline;
 import net.vulkanmod.render.chunk.build.light.data.QuadLightData;
 import net.vulkanmod.render.model.quad.ModelQuadFlags;
@@ -47,7 +47,7 @@ public class FlatLightPipeline implements LightPipeline {
         }
 
         Arrays.fill(out.lm, lightmap);
-        Arrays.fill(out.br, this.lightCache.getRegion().getShade(lightFace, shade));
+        Arrays.fill(out.br, this.lightCache.getRegion().method_24852(lightFace, shade));
     }
 
     private int getLightmap(BlockPos pos, Direction face) {

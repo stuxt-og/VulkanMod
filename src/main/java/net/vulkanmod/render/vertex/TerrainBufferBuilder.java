@@ -99,7 +99,7 @@ public class TerrainBufferBuilder implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer setColor(int r, int g, int b, int a) {
+	public VertexConsumer method_1336(int r, int g, int b, int a) {
 		int color = (a & 0xFF) << 24 | (b & 0xFF) << 16 | (g & 0xFF) << 8 | (r & 0xFF);
 
 		this.vertexBuilder.color(this.elementPtr, color);
@@ -114,14 +114,14 @@ public class TerrainBufferBuilder implements VertexConsumer {
 		return this;
 	}
 
-	public VertexConsumer setLight(int i) {
+	public VertexConsumer method_60803(int i) {
 		this.vertexBuilder.light(this.elementPtr, i);
 
 		return this;
 	}
 
 	@Override
-	public VertexConsumer setNormal(float f, float g, float h) {
+	public VertexConsumer method_22914(float f, float g, float h) {
 		int packedNormal = I32_SNorm.packNormal(f, g, h);
 
 		this.vertexBuilder.normal(this.elementPtr, packedNormal);
@@ -130,12 +130,12 @@ public class TerrainBufferBuilder implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer setUv1(int i, int j) {
+	public VertexConsumer method_60796(int i, int j) {
 		return this;
 	}
 
 	@Override
-	public VertexConsumer setUv2(int i, int j) {
+	public VertexConsumer method_22921(int i, int j) {
 		return this;
 	}
 }

@@ -1,8 +1,12 @@
 package net.vulkanmod.mixin.render.vertex;
 
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.core.Vec3i;
+import net.minecraft.class_2382;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.BakedQuad;
 import net.vulkanmod.interfaces.ExtendedVertexBuilder;
 import net.vulkanmod.mixin.matrix.PoseAccessor;
 import net.vulkanmod.render.util.MathUtil;
@@ -32,7 +36,7 @@ public abstract class BufferBuilderM
     public void vertex(float x, float y, float z, int packedColor, float u, float v, int overlay, int light, int packedNormal) {
         this.ptr = this.beginVertex();
 
-        if (this.format == DefaultVertexFormat.NEW_ENTITY) {
+        if (this.format == DefaultVertexFormat.field_1580) {
             MemoryUtil.memPutFloat(ptr + 0, x);
             MemoryUtil.memPutFloat(ptr + 4, y);
             MemoryUtil.memPutFloat(ptr + 8, z);
@@ -124,7 +128,7 @@ public abstract class BufferBuilderM
      * @author
      */
     @Overwrite
-    public void addVertex(float x, float y, float z, int color, float u, float v, int overlay, int light, float normalX, float normalY, float normalZ) {
+    public void method_23919(float x, float y, float z, int color, float u, float v, int overlay, int light, float normalX, float normalY, float normalZ) {
         if (this.fastFormat) {
             long ptr = this.beginVertex();
             MemoryUtil.memPutFloat(ptr + 0, x);
@@ -149,12 +153,12 @@ public abstract class BufferBuilderM
             int temp = I32_SNorm.packNormal(normalX, normalY, normalZ);
             MemoryUtil.memPutInt(ptr + i + 4, temp);
         } else {
-            VertexConsumer.super.addVertex(x, y, z, color, u, v, overlay, light, normalX, normalY, normalZ);
+            VertexConsumer.super.method_23919(x, y, z, color, u, v, overlay, light, normalX, normalY, normalZ);
         }
     }
 
     @Override
-    public void putBulkData(PoseStack.Pose matrixEntry, BakedQuad quad, float[] brightness, float red, float green,
+    public void method_22920(PoseStack.Pose matrixEntry, BakedQuad quad, float[] brightness, float red, float green,
                             float blue, float alpha, int[] lights, int overlay, boolean useQuadColorData) {
         putQuadData(matrixEntry, quad, brightness, red, green, blue, alpha, lights, overlay, useQuadColorData);
     }
@@ -162,12 +166,12 @@ public abstract class BufferBuilderM
     @SuppressWarnings("UnreachableCode")
     @Unique
     private void putQuadData(PoseStack.Pose matrixEntry, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lights, int overlay, boolean useQuadColorData) {
-        int[] quadData = quad.getVertices();
-        Vec3i vec3i = quad.getDirection().getNormal();
-        Matrix4f matrix4f = matrixEntry.pose();
+        int[] quadData = quad.comp_3721();
+        class_2382 vec3i = quad.comp_3723().method_62675();
+        Matrix4f matrix4f = matrixEntry.method_23761();
 
         boolean trustedNormals = ((PoseAccessor)(Object)matrixEntry).trustedNormals();
-        int normal = MathUtil.packTransformedNorm(matrixEntry.normal(), trustedNormals, vec3i.getX(), vec3i.getY(), vec3i.getZ());
+        int normal = MathUtil.packTransformedNorm(matrixEntry.method_23762(), trustedNormals, vec3i.getX(), vec3i.getY(), vec3i.getZ());
 
         for (int k = 0; k < 4; ++k) {
             float r, g, b;

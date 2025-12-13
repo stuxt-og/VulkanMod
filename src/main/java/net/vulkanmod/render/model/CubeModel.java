@@ -1,11 +1,11 @@
 package net.vulkanmod.render.model;
 
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.core.Direction;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.Set;
+import net.minecraft.core.Direction;
 
 public class CubeModel {
 

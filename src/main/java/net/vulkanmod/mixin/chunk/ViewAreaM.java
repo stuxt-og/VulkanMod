@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ViewArea.class)
 public abstract class ViewAreaM {
-
 	@Shadow public SectionRenderDispatcher.RenderSection[] sections;
 
 	@Shadow protected abstract void setViewDistance(int i);

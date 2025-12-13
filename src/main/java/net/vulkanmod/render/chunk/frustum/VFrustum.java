@@ -1,6 +1,6 @@
 package net.vulkanmod.render.chunk.frustum;
 
-import net.minecraft.world.phys.AABB;
+import net.minecraft.class_238;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -68,8 +68,8 @@ public class VFrustum {
         return this.frustum.intersectAab(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public boolean isVisible(AABB aABB) {
-        return this.cubeInFrustum(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ);
+    public boolean isVisible(class_238 aABB) {
+        return this.cubeInFrustum(aABB.field_1323, aABB.field_1322, aABB.field_1321, aABB.field_1320, aABB.field_1325, aABB.field_1324);
     }
 
     private boolean cubeInFrustum(double d, double e, double f, double g, double h, double i) {

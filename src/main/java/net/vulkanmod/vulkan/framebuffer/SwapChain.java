@@ -2,6 +2,7 @@ package net.vulkanmod.vulkan.framebuffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import net.vulkanmod.Initializer;
+import net.vulkanmod.gl.VkGlTexture;
 import net.vulkanmod.render.util.MathUtil;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.Vulkan;

@@ -1,8 +1,7 @@
 package net.vulkanmod.mixin.texture.mip;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.Util;
-import net.minecraft.client.renderer.texture.MipmapGenerator;
+import net.minecraft.class_4725;
 import net.vulkanmod.mixin.texture.image.NativeImageAccessor;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
@@ -10,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MipmapGenerator.class)
+@Mixin(class_4725.class)
 public abstract class MipmapGeneratorM {
     private static final int ALPHA_CUTOFF = 50;
 

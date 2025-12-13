@@ -1,19 +1,19 @@
 package net.vulkanmod.render.chunk.build;
 
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -39,7 +39,7 @@ public class RenderRegion implements BlockAndTintGetter, RenderAttachedBlockView
     private final int minSecX, minSecY, minSecZ;
     private final int minX, minY, minZ;
     private final int maxX, maxY, maxZ;
-    private final Level level;
+    private final ClientLevel level;
     private final int blendRadius;
 
     private final PalettedContainer<BlockState>[] blockDataContainers;
@@ -53,7 +53,7 @@ public class RenderRegion implements BlockAndTintGetter, RenderAttachedBlockView
 
     private final Function<BlockPos, BlockState> blockStateGetter;
 
-    RenderRegion(Level level, int x, int y, int z, PalettedContainer<BlockState>[] blockData, DataLayer[][] lightData,
+    RenderRegion(ClientLevel level, int x, int y, int z, PalettedContainer<BlockState>[] blockData, DataLayer[][] lightData,
                  BiomeData biomeData, Map<BlockPos, BlockEntity> blockEntityMap) {
         this.level = level;
 
@@ -133,11 +133,11 @@ public class RenderRegion implements BlockAndTintGetter, RenderAttachedBlockView
         this.tintCache.init(biomeData, blendRadius, minSecX + 1, minSecY + 1, minSecZ + 1);
     }
 
-    public BlockState getBlockState(BlockPos blockPos) {
+    public @NotNull BlockState getBlockState(BlockPos blockPos) {
         return blockStateGetter.apply(blockPos);
     }
 
-    public FluidState getFluidState(BlockPos blockPos) {
+    public @NotNull FluidState getFluidState(BlockPos blockPos) {
         return this.getBlockState(blockPos).getFluidState();
     }
 
@@ -145,7 +145,7 @@ public class RenderRegion implements BlockAndTintGetter, RenderAttachedBlockView
         return this.level.getShade(direction, bl);
     }
 
-    public LevelLightEngine getLightEngine() {
+    public @NotNull LevelLightEngine getLightEngine() {
         return this.level.getLightEngine();
     }
 
@@ -193,8 +193,8 @@ public class RenderRegion implements BlockAndTintGetter, RenderAttachedBlockView
         return tintCache.getColor(blockPos, colorResolver);
     }
 
-    public int getMinBuildHeight() {
-        return this.level.getMinBuildHeight();
+    public int getMinY() {
+        return this.level.getMinY();
     }
 
     public int getHeight() {
@@ -239,7 +239,7 @@ public class RenderRegion implements BlockAndTintGetter, RenderAttachedBlockView
             blockState = Blocks.BARRIER.defaultBlockState();
         }
         else if (y == 70) {
-            blockState = DebugLevelSource.getBlockStateFor(x, z);
+            blockState = DebugLevelSource.method_12578(x, z);
         }
 
         return blockState == null ? Blocks.AIR.defaultBlockState() : blockState;

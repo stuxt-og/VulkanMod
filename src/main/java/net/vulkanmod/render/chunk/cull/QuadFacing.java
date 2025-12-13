@@ -1,7 +1,7 @@
 package net.vulkanmod.render.chunk.cull;
 
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
+import org.joml.Math;
 import net.vulkanmod.render.vertex.format.I32_SNorm;
 import org.joml.Vector3f;
 
@@ -47,16 +47,16 @@ public enum QuadFacing {
 
         float sum = absX + absY + absZ;
 
-        if (Mth.equal(sum, 1.0f)) {
-            if (Mth.equal(absX, 1.0f)) {
+        if (Math.equal(sum, 1.0f)) {
+            if (Math.equal(absX, 1.0f)) {
                 return x > 0.0f ? QuadFacing.X_POS : QuadFacing.X_NEG;
             }
 
-            if (Mth.equal(absY, 1.0f)) {
+            if (Math.equal(absY, 1.0f)) {
                 return y > 0.0f ? QuadFacing.Y_POS : QuadFacing.Y_NEG;
             }
 
-            if (Mth.equal(absZ, 1.0f)) {
+            if (Math.equal(absZ, 1.0f)) {
                 return z > 0.0f ? QuadFacing.Z_POS : QuadFacing.Z_NEG;
             }
         }

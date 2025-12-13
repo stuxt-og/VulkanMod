@@ -2,9 +2,9 @@ package net.vulkanmod.render.chunk;
 
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.Minecraft;
 import net.vulkanmod.render.chunk.buffer.AreaBuffer;
 import net.vulkanmod.render.chunk.buffer.DrawBuffers;
 import net.vulkanmod.render.chunk.buffer.DrawParametersBuffer;
@@ -234,7 +234,7 @@ public class RenderSection {
     public BuildTask createCompileTask(RenderRegionBuilder renderRegionCache) {
         boolean flag = this.cancelTasks();
 
-        Level level = WorldRenderer.getLevel();
+        ClientLevel level = WorldRenderer.getLevel();
         int secX = xOffset >> 4;
         int secZ = zOffset >> 4;
         int secY = yOffset >> 4;

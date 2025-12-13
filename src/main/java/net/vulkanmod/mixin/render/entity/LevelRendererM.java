@@ -1,20 +1,20 @@
 package net.vulkanmod.mixin.render.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.util.Mth;
-import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.Minecraft;
+import org.joml.Math;
+import net.minecraft.client.Camera;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.class_8921;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.class_9922;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.render.chunk.WorldRenderer;
 import org.joml.Matrix4f;
@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
 import java.util.Map;
 
 @Mixin(LevelRenderer.class)
@@ -39,7 +40,9 @@ public class LevelRendererM {
                     target = "Lnet/minecraft/client/renderer/LevelRenderer;setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V",
                     shift = At.Shift.AFTER)
     )
-    private void clearMap(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    private void clearMap(class_9922 graphicsResourceAllocator, DeltaTracker deltaTracker, boolean bl,
+                          Camera camera, GameRenderer gameRenderer, Matrix4f matrix4f, Matrix4f matrix4f2,
+                          CallbackInfo ci) {
         for (var bufferSource : this.bufferSourceMap.keySet()) {
             var entityMap = this.bufferSourceMap.get(bufferSource);
             entityMap.clear();
@@ -55,11 +58,10 @@ public class LevelRendererM {
     @Overwrite
     private void renderEntity(Entity entity, double d, double e, double f, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         if (!Initializer.CONFIG.entityCulling || !this.managed) {
-            double h = Mth.lerp(partialTicks, entity.xOld, entity.getX());
-            double i = Mth.lerp(partialTicks, entity.yOld, entity.getY());
-            double j = Mth.lerp(partialTicks, entity.zOld, entity.getZ());
-            float k = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
-            this.entityRenderDispatcher.render(entity, h - d, i - e, j - f, k, partialTicks, poseStack, multiBufferSource, this.entityRenderDispatcher.getPackedLightCoords(entity, partialTicks));
+            double h = Math.method_16436(partialTicks, entity.field_6038, entity.getX());
+            double i = Math.method_16436(partialTicks, entity.field_5971, entity.method_23318());
+            double j = Math.method_16436(partialTicks, entity.field_5989, entity.getY());
+            this.entityRenderDispatcher.method_62424(entity, h - d, i - e, j - f, partialTicks, poseStack, multiBufferSource, this.entityRenderDispatcher.method_23839(entity, partialTicks));
             return;
         }
 
@@ -70,31 +72,27 @@ public class LevelRendererM {
         list.add(entity);
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endLastBatch()V",
-            shift = At.Shift.AFTER, ordinal = 0)
-    )
-    private void renderEntities(DeltaTracker deltaTracker, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    @Inject(method = "renderEntities", at = @At("RETURN"))
+    private void renderEntities(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource1, Camera camera, DeltaTracker deltaTracker, List<Entity> entityList, CallbackInfo ci) {
         if (!Initializer.CONFIG.entityCulling)
             return;
 
         Vec3 cameraPos = WorldRenderer.getCameraPos();
-        TickRateManager tickRateManager = this.minecraft.level.tickRateManager();
+        class_8921 tickRateManager = this.minecraft.level.method_54719();
 
-        PoseStack poseStack = new PoseStack();
+//        PoseStack poseStack = new PoseStack();
 
         for (var bufferSource : this.bufferSourceMap.keySet()) {
             var entityMap = this.bufferSourceMap.get(bufferSource);
 
             for (var list : entityMap.values()) {
                 for (Entity entity : list) {
-                    float partialTicks = deltaTracker.getGameTimeDeltaPartialTick(!tickRateManager.isEntityFrozen(entity));
+                    float partialTicks = deltaTracker.method_60637(!tickRateManager.method_54746(entity));
 
-                    double h = Mth.lerp(partialTicks, entity.xOld, entity.getX());
-                    double i = Mth.lerp(partialTicks, entity.yOld, entity.getY());
-                    double j = Mth.lerp(partialTicks, entity.zOld, entity.getZ());
-                    float k = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
-                    this.entityRenderDispatcher.render(entity, h - cameraPos.x, i - cameraPos.y, j - cameraPos.z, k, partialTicks, poseStack, bufferSource, this.entityRenderDispatcher.getPackedLightCoords(entity, partialTicks));
+                    double h = Math.method_16436(partialTicks, entity.field_6038, entity.getX());
+                    double i = Math.method_16436(partialTicks, entity.field_5971, entity.method_23318());
+                    double j = Math.method_16436(partialTicks, entity.field_5989, entity.getY());
+                    this.entityRenderDispatcher.method_62424(entity, h - cameraPos.x, i - cameraPos.y, j - cameraPos.z, partialTicks, poseStack, bufferSource, this.entityRenderDispatcher.method_23839(entity, partialTicks));
                 }
             }
         }

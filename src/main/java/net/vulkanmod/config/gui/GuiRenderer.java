@@ -3,16 +3,15 @@ package net.vulkanmod.config.gui;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix4f;
 
 import java.util.List;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
 
 public abstract class GuiRenderer {
 
@@ -35,8 +34,8 @@ public abstract class GuiRenderer {
 
     public static void enableScissor(int x, int y, int width, int height) {
         Window window = Minecraft.getInstance().getWindow();
-        int wHeight = window.getHeight();
-        double scale = window.getGuiScale();
+        int wHeight = window.getWidth();
+        double scale = window.getHeight();
         int xScaled = (int) (x * scale);
         int yScaled = (int) (wHeight - (y + height) * scale);
         int widthScaled = (int) (width * scale);
@@ -55,19 +54,12 @@ public abstract class GuiRenderer {
     public static void fill(float x0, float y0, float x1, float y1, float z, int color) {
         Matrix4f matrix4f = pose.last().pose();
 
-        float a = (float) FastColor.ARGB32.alpha(color) / 255.0F;
-        float r = (float) FastColor.ARGB32.red(color) / 255.0F;
-        float g = (float) FastColor.ARGB32.green(color) / 255.0F;
-        float b = (float) FastColor.ARGB32.blue(color) / 255.0F;
-
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
         setupBufferBuilder();
 
-        bufferBuilder.addVertex(matrix4f, x0, y0, z).setColor(r, g, b, a);
-        bufferBuilder.addVertex(matrix4f, x0, y1, z).setColor(r, g, b, a);
-        bufferBuilder.addVertex(matrix4f, x1, y1, z).setColor(r, g, b, a);
-        bufferBuilder.addVertex(matrix4f, x1, y0, z).setColor(r, g, b, a);
+        bufferBuilder.addVertex(matrix4f, x0, y0, z).setColor(color);
+        bufferBuilder.addVertex(matrix4f, x0, y1, z).setColor(color);
+        bufferBuilder.addVertex(matrix4f, x1, y1, z).setColor(color);
+        bufferBuilder.addVertex(matrix4f, x1, y0, z).setColor(color);
 
         submitIfNeeded();
     }
@@ -77,23 +69,14 @@ public abstract class GuiRenderer {
     }
 
     public static void fillGradient(float x0, float y0, float x1, float y1, float z, int color1, int color2) {
-        float a1 = (float) FastColor.ARGB32.alpha(color1) / 255.0F;
-        float r1 = (float) FastColor.ARGB32.red(color1) / 255.0F;
-        float g1 = (float) FastColor.ARGB32.green(color1) / 255.0F;
-        float b1 = (float) FastColor.ARGB32.blue(color1) / 255.0F;
-        float a2 = (float) FastColor.ARGB32.alpha(color2) / 255.0F;
-        float r2 = (float) FastColor.ARGB32.red(color2) / 255.0F;
-        float g2 = (float) FastColor.ARGB32.green(color2) / 255.0F;
-        float b2 = (float) FastColor.ARGB32.blue(color2) / 255.0F;
-
         Matrix4f matrix4f = pose.last().pose();
 
         setupBufferBuilder();
 
-        bufferBuilder.addVertex(matrix4f, x0, y0, z).setColor(r1, g1, b1, a1);
-        bufferBuilder.addVertex(matrix4f, x0, y1, z).setColor(r2, g2, b2, a2);
-        bufferBuilder.addVertex(matrix4f, x1, y1, z).setColor(r2, g2, b2, a2);
-        bufferBuilder.addVertex(matrix4f, x1, y0, z).setColor(r1, g1, b1, a1);
+        bufferBuilder.addVertex(matrix4f, x0, y0, z).setColor(color1);
+        bufferBuilder.addVertex(matrix4f, x0, y1, z).setColor(color2);
+        bufferBuilder.addVertex(matrix4f, x1, y1, z).setColor(color2);
+        bufferBuilder.addVertex(matrix4f, x1, y0, z).setColor(color1);
 
         submitIfNeeded();
     }
@@ -147,12 +130,11 @@ public abstract class GuiRenderer {
     }
 
     public static void endBatch() {
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderType renderType = RenderType.gui();
         MeshData meshData = bufferBuilder.build();
 
         if (meshData != null) {
-            BufferUploader.drawWithShader(meshData);
-            meshData.close();
+            renderType.draw(meshData);
         }
 
         batching = false;
@@ -176,8 +158,8 @@ public abstract class GuiRenderer {
 
     private static void submitIfNeeded() {
         if (!batching) {
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+            RenderType renderType = RenderType.gui();
+            renderType.draw(bufferBuilder.build());
             drawing = false;
         }
     }

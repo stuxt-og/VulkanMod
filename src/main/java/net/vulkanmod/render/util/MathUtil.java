@@ -64,4 +64,14 @@ public class MathUtil {
     public static float transformNormZ(Matrix3f mat, float x, float y, float z) {
         return Math.fma(mat.m02(), x, Math.fma(mat.m12(), y, mat.m22() * z));
     }
+
+    public static int floorMod(int x, int y) {
+        int r = x % y;
+        return r < 0 ? r + y : r;
+    }
+
+    public static long floorMod(long x, long y) {
+        long r = x % y;
+        return r < 0 ? r + y : r;
+    }
 }

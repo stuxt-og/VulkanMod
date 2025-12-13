@@ -1,8 +1,8 @@
 package net.vulkanmod.config.gui.widget;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.network.chat.Component;
 import net.vulkanmod.config.gui.GuiRenderer;
 import net.vulkanmod.config.option.SwitchOption;
 import net.vulkanmod.vulkan.util.ColorUtil;
@@ -46,8 +46,8 @@ public class SwitchOptionWidget extends OptionWidget<SwitchOption> {
         color = this.active ? 0xFFFFFF : 0xA0A0A0;
         Font textRenderer = Minecraft.getInstance().font;
         int margin = Math.max(
-                textRenderer.width(Component.translatable("options.on").getString()) / 3,
-                textRenderer.width(Component.translatable("options.off").getString()) / 3
+                textRenderer.method_1727(Component.translatable("options.on").getString()) / 3,
+                textRenderer.method_1727(Component.translatable("options.off").getString()) / 3
         );
 
         int x = this.controlX + this.controlWidth / 2 - (int) (halfWidth * 1.5f) - 4 - margin;
@@ -77,12 +77,12 @@ public class SwitchOptionWidget extends OptionWidget<SwitchOption> {
     }
 
     @Override
-    public void setFocused(boolean bl) {
+    public void method_25365(boolean bl) {
         this.focused = bl;
     }
 
     @Override
-    public boolean isFocused() {
+    public boolean method_25370() {
         return this.focused;
     }
 

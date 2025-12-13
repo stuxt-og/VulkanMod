@@ -1,12 +1,12 @@
 package net.vulkanmod.config.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import org.joml.Math;
 import net.vulkanmod.config.gui.GuiRenderer;
+import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
 import java.util.function.Consumer;
@@ -27,10 +27,10 @@ public class VButtonWidget extends VAbstractWidget {
     public void renderWidget(double mouseX, double mouseY) {
         Minecraft minecraftClient = Minecraft.getInstance();
         Font textRenderer = minecraftClient.font;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, this.alpha);
 
-        RenderSystem.enableBlend();
+        VRenderSystem.enableBlend();
 
         int xPadding = 0;
         int yPadding = 0;
@@ -43,9 +43,9 @@ public class VButtonWidget extends VAbstractWidget {
         }
 
         int j = this.active ? 0xFFFFFF : 0xA0A0A0;
-        GuiRenderer.drawCenteredString(textRenderer, this.message, this.x + this.width / 2, this.y + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0f) << 24);
+        GuiRenderer.drawCenteredString(textRenderer, this.message, this.x + this.width / 2, this.y + (this.height - 8) / 2, j | Math.method_15386(this.alpha * 255.0f) << 24);
 
-        RenderSystem.enableBlend();
+//        RenderSystem.enableBlend();
 
         if(this.selected) {
 //            color = ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 1.0f);

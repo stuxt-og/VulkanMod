@@ -1,11 +1,11 @@
 package net.vulkanmod.render.chunk.build.light.smooth;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.vulkanmod.render.chunk.util.SimpleDirection;
 import net.vulkanmod.render.model.quad.ModelQuadView;
 import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import org.joml.Math;
 import net.vulkanmod.render.chunk.build.light.LightPipeline;
 import net.vulkanmod.render.chunk.build.light.data.QuadLightData;
 import net.vulkanmod.render.model.quad.ModelQuadFlags;
@@ -144,7 +144,7 @@ public class SmoothLightPipeline implements LightPipeline {
 
             // If the quad is approximately grid-aligned (not inset) to the other side of the block, avoid unnecessary
             // computation by treating it is as aligned
-            if (Mth.equal(depth, 1.0F)) {
+            if (Math.equal(depth, 1.0F)) {
                 this.applyAlignedPartialFaceVertex(pos, dir, weights, i, out, false);
             } else {
                 // Blend the occlusion factor between the blocks directly beside this face and the blocks above it
@@ -170,9 +170,9 @@ public class SmoothLightPipeline implements LightPipeline {
             float depth = neighborInfo.getDepth(cx, cy, cz);
 
             // If the quad is approximately grid-aligned (not inset), avoid unnecessary computation by treating it is as aligned
-            if (Mth.equal(depth, 0.0F)) {
+            if (Math.equal(depth, 0.0F)) {
                 this.applyAlignedPartialFaceVertex(pos, dir, weights, i, out, true);
-            } else if (Mth.equal(depth, 1.0F)) {
+            } else if (Math.equal(depth, 1.0F)) {
                 this.applyAlignedPartialFaceVertex(pos, dir, weights, i, out, false);
             } else {
                 // Blend the occlusion factor between the blocks directly beside this face and the blocks above it
@@ -220,7 +220,7 @@ public class SmoothLightPipeline implements LightPipeline {
     }
 
     private void applySidedBrightness(QuadLightData out, Direction face, boolean shade) {
-        float brightness = this.lightCache.getRegion().getShade(face, shade);
+        float brightness = this.lightCache.getRegion().method_24852(face, shade);
         float[] br = out.br;
 
         for (int i = 0; i < br.length; i++) {

@@ -16,116 +16,67 @@
 
 package net.vulkanmod.render.chunk.build.frapi.render;
 
-import java.util.function.Consumer;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat;
+import net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl;
 
-abstract class AbstractRenderContext implements RenderContext {
-	private static final QuadTransform NO_TRANSFORM = q -> true;
 
-	private QuadTransform activeTransform = NO_TRANSFORM;
-	private final ObjectArrayList<QuadTransform> transformStack = new ObjectArrayList<>();
-	private final QuadTransform stackTransform = q -> {
-		int i = transformStack.size() - 1;
-
-		while (i >= 0) {
-			if (!transformStack.get(i--).transform(q)) {
-				return false;
-			}
+public abstract class AbstractRenderContext {
+	private final MutableQuadViewImpl editorQuad = new MutableQuadViewImpl() {
+		{
+			data = new int[EncodingFormat.TOTAL_STRIDE];
+			clear();
 		}
 
-		return true;
+		@Override
+		protected void emitDirectly() {
+			bufferQuad(this);
+		}
 	};
 
-	@Deprecated
-	private final Consumer<Mesh> meshConsumer = mesh -> mesh.outputTo(getEmitter());
-
-	protected Matrix4f matrix;
-	protected Matrix3f normalMatrix;
-	protected int overlay;
 	private final Vector4f posVec = new Vector4f();
 	private final Vector3f normalVec = new Vector3f();
 
-	protected final boolean transform(MutableQuadView q) {
-		return activeTransform.transform(q);
+	protected PoseStack.Pose matrices;
+	protected int overlay;
+
+	protected QuadEmitter getEmitter() {
+		editorQuad.clear();
+		return editorQuad;
 	}
 
-	@Override
-	public boolean hasTransform() {
-		return activeTransform != NO_TRANSFORM;
-	}
-
-	@Override
-	public void pushTransform(QuadTransform transform) {
-		if (transform == null) {
-			throw new NullPointerException("Renderer received null QuadTransform.");
-		}
-
-		transformStack.push(transform);
-
-		if (transformStack.size() == 1) {
-			activeTransform = transform;
-		} else if (transformStack.size() == 2) {
-			activeTransform = stackTransform;
-		}
-	}
-
-	@Override
-	public void popTransform() {
-		transformStack.pop();
-
-		if (transformStack.size() == 0) {
-			activeTransform = NO_TRANSFORM;
-		} else if (transformStack.size() == 1) {
-			activeTransform = transformStack.get(0);
-		}
-	}
-
-	// Overridden to prevent allocating a lambda every time this method is called.
-	@Deprecated
-	@Override
-	public Consumer<Mesh> meshConsumer() {
-		return meshConsumer;
-	}
+	protected abstract void bufferQuad(MutableQuadViewImpl quadView);
 
 	/** final output step, common to all renders. */
 	protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
 		final Vector4f posVec = this.posVec;
 		final Vector3f normalVec = this.normalVec;
+		final PoseStack.Pose matrices = this.matrices;
+		final Matrix4f posMatrix = matrices.method_23761();
 		final boolean useNormals = quad.hasVertexNormals();
 
 		if (useNormals) {
 			quad.populateMissingNormals();
 		} else {
-			normalVec.set(quad.faceNormal());
-			normalVec.mul(normalMatrix);
+			matrices.method_56821(quad.faceNormal(), normalVec);
 		}
 
 		for (int i = 0; i < 4; i++) {
 			posVec.set(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-			posVec.mul(matrix);
-			vertexConsumer.addVertex(posVec.x(), posVec.y(), posVec.z());
-
-			final int color = quad.color(i);
-			vertexConsumer.setColor(color);
-			vertexConsumer.setUv(quad.u(i), quad.v(i));
-			vertexConsumer.setOverlay(overlay);
-			vertexConsumer.setLight(quad.lightmap(i));
+			posVec.mul(posMatrix);
 
 			if (useNormals) {
 				quad.copyNormal(i, normalVec);
-				normalVec.mul(normalMatrix);
+				matrices.method_56821(normalVec, normalVec);
 			}
 
-			vertexConsumer.setNormal(normalVec.x(), normalVec.y(), normalVec.z());
+			vertexConsumer.method_23919(posVec.x(), posVec.y(), posVec.z(), quad.color(i), quad.u(i), quad.v(i), overlay, quad.lightmap(i), normalVec.x(), normalVec.y(), normalVec.z());
 		}
 	}
 }

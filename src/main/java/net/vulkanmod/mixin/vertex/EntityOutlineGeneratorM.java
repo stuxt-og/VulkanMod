@@ -1,14 +1,14 @@
 package net.vulkanmod.mixin.vertex;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.OutlineBufferSource;
+import net.minecraft.class_4618;
 import net.vulkanmod.interfaces.ExtendedVertexBuilder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(OutlineBufferSource.EntityOutlineGenerator.class)
+@Mixin(class_4618.class_4586.class)
 public class EntityOutlineGeneratorM implements ExtendedVertexBuilder {
 
     private ExtendedVertexBuilder extDelegate;

@@ -1,11 +1,11 @@
 package net.vulkanmod.config.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import org.joml.Math;
 import net.vulkanmod.config.gui.GuiRenderer;
 import net.vulkanmod.config.option.RangeOption;
 import net.vulkanmod.vulkan.util.ColorUtil;
@@ -61,7 +61,7 @@ public class RangeOptionWidget extends OptionWidget<RangeOption> {
         int x = this.controlX + this.controlWidth / 2 - width / 2;
 //        int x = (int) (this.x + 0.5f * width);
         int y = this.y + (this.height - 9) / 2;
-        GuiRenderer.drawString(font, text.getVisualOrderText(), x, y, color);
+        GuiRenderer.drawString(font, text.method_30937(), x, y, color);
     }
 
     @Override
@@ -83,12 +83,12 @@ public class RangeOptionWidget extends OptionWidget<RangeOption> {
     }
 
     @Override
-    public void setFocused(boolean bl) {
+    public void method_25365(boolean bl) {
         this.focused = bl;
     }
 
     @Override
-    public boolean isFocused() {
+    public boolean method_25370() {
         return this.focused;
     }
 
@@ -98,7 +98,7 @@ public class RangeOptionWidget extends OptionWidget<RangeOption> {
 
     private void setValue(double value) {
         double d = this.value;
-        this.value = Mth.clamp(value, 0.0, 1.0);
+        this.value = Math.clamp(value, 0.0, 1.0);
         if (d != this.value) {
             this.applyValue();
         }
@@ -122,7 +122,7 @@ public class RangeOptionWidget extends OptionWidget<RangeOption> {
     @Override
     public void onRelease(double mouseX, double mouseY) {
         if (this.controlHovered) {
-            super.playDownSound(Minecraft.getInstance().getSoundManager());
+            super.playDownSound(Minecraft.getInstance().method_1483());
         }
     }
 }

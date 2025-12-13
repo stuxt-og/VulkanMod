@@ -1,7 +1,7 @@
 package net.vulkanmod.mixin.render.entity.model;
 
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
+import net.minecraft.client.model.geom.ModelPart;
 import net.vulkanmod.interfaces.ModelPartCubeMixed;
 import net.vulkanmod.render.model.CubeModel;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
-@Mixin(ModelPart.Cube.class)
+@Mixin(ModelPart.class_628.class)
 public class ModelPartCubeM implements ModelPartCubeMixed {
 
     CubeModel cube;

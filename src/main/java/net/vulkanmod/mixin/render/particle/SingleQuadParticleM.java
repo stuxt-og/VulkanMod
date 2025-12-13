@@ -6,14 +6,13 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SingleQuadParticle;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.vulkanmod.render.chunk.WorldRenderer;
+import org.joml.Math;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.vulkanmod.interfaces.ExtendedVertexBuilder;
 import net.vulkanmod.render.chunk.RenderSection;
-import net.vulkanmod.render.chunk.WorldRenderer;
-import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.util.ColorUtil;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -24,7 +23,6 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(SingleQuadParticle.class)
 public abstract class SingleQuadParticleM extends Particle {
-
     @Shadow protected float quadSize;
 
     @Unique private final Quaternionf quaternionf = new Quaternionf();
@@ -50,9 +48,9 @@ public abstract class SingleQuadParticleM extends Particle {
      */
     @Overwrite
     public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
-        double lx = (Mth.lerp(f, this.xo, this.x));
-        double ly = (Mth.lerp(f, this.yo, this.y));
-        double lz = (Mth.lerp(f, this.zo, this.z));
+        double lx = (Math.lerp(f, this.xd, this.x));
+        double ly = (Math.lerp(f, this.yd, this.y));
+        double lz = (Math.lerp(f, this.zd, this.z));
 
         if (cull(WorldRenderer.getInstance(), lx, ly, lz))
             return;
@@ -65,7 +63,7 @@ public abstract class SingleQuadParticleM extends Particle {
         quaternionf.identity();
         this.getFacingCameraMode().setRotation(quaternionf, camera, f);
         if (this.roll != 0.0F) {
-            quaternionf.rotateZ(Mth.lerp(f, this.oRoll, this.roll));
+            quaternionf.rotateZ(Math.lerp(f, this.oRoll, this.roll));
         }
 
         this.renderRotatedQuad(vertexConsumer, quaternionf, offsetX, offsetY, offsetZ, f);
@@ -78,7 +76,7 @@ public abstract class SingleQuadParticleM extends Particle {
         float u1 = this.getU1();
         float v0 = this.getV0();
         float v1 = this.getV1();
-        int light = this.getLightColor(f);
+        int light = this.method_3068(f);
 
         ExtendedVertexBuilder vertexBuilder = (ExtendedVertexBuilder)vertexConsumer;
         int packedColor = ColorUtil.RGBA.pack(this.rCol, this.gCol, this.bCol, this.alpha);
@@ -101,7 +99,7 @@ public abstract class SingleQuadParticleM extends Particle {
         vertexConsumer.vertex(vector3f.x(), vector3f.y(), vector3f.z(), u, v, color, light);
     }
 
-    protected int getLightColor(float f) {
+    protected int method_3068(float f) {
         BlockPos blockPos = BlockPos.containing(this.x, this.y, this.z);
         return this.level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(this.level, blockPos) : 0;
     }

@@ -1,6 +1,6 @@
 package net.vulkanmod.vulkan;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.Minecraft;
@@ -39,9 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.mojang.blaze3d.platform.GlConst.GL_COLOR_BUFFER_BIT;
-import static com.mojang.blaze3d.platform.GlConst.GL_DEPTH_BUFFER_BIT;
 import static net.vulkanmod.vulkan.Vulkan.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.EXTDebugUtils.*;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
@@ -227,10 +227,10 @@ public class Renderer {
 
             if (getSwapChain().getWidth() == 0 && getSwapChain().getHeight() == 0) {
                 skipRendering = true;
-                Minecraft.getInstance().noRender = true;
+                Minecraft.getInstance().field_1743 = true;
             } else {
                 skipRendering = false;
-                Minecraft.getInstance().noRender = false;
+                Minecraft.getInstance().field_1743 = false;
             }
         }
 

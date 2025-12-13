@@ -2,9 +2,12 @@ package net.vulkanmod.mixin.render.target;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.TextureFormat;
 import net.vulkanmod.vulkan.Renderer;
-import net.vulkanmod.vulkan.Vulkan;
-import net.vulkanmod.vulkan.framebuffer.SwapChain;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -12,7 +15,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 public class MainTargetMixin extends RenderTarget {
 
     public MainTargetMixin(boolean useDepth) {
-        super(useDepth);
+        super("Main", useDepth);
     }
 
     /**
@@ -21,8 +24,6 @@ public class MainTargetMixin extends RenderTarget {
      */
     @Overwrite
     private void createFrameBuffer(int width, int height) {
-        this.frameBufferId = 0;
-
         this.viewWidth = width;
         this.viewHeight = height;
         this.width = width;
@@ -30,17 +31,41 @@ public class MainTargetMixin extends RenderTarget {
     }
 
     @Override
-    public void bindWrite(boolean updateScissor) {
-        Renderer.getInstance().getMainPass().rebindMainTarget();
+    public void createBuffers(int i, int j) {
+        RenderSystem.assertOnRenderThread();
+        int k = RenderSystem.getDevice().getMaxTextureSize();
+        if (i > 0 && i <= k && j > 0 && j <= k) {
+            this.viewWidth = i;
+            this.viewHeight = j;
+            this.width = i;
+            this.height = j;
+            if (this.useDepth) {
+                this.depthTexture = RenderSystem.getDevice().createTexture(() -> this.label + " / Depth", TextureFormat.DEPTH32, i, j, 1);
+                this.depthTexture.setTextureFilter(FilterMode.NEAREST, false);
+                this.depthTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
+            }
+
+            this.colorTexture = RenderSystem.getDevice().createTexture(() -> this.label + " / Color", TextureFormat.RGBA8, i, j, 1);
+            this.colorTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
+            this.setFilterMode(FilterMode.NEAREST, true);
+        } else {
+            throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
+        }
+    }
+
+    private void setFilterMode(FilterMode filterMode, boolean bl) {
+        if (this.colorTexture == null) {
+            throw new IllegalStateException("Can't change filter mode, color texture doesn't exist yet");
+        } else {
+            if (bl || filterMode != this.filterMode) {
+                this.filterMode = filterMode;
+                this.colorTexture.setTextureFilter(filterMode, false);
+            }
+        }
     }
 
     @Override
-    public void bindRead() {
-        Renderer.getInstance().getMainPass().bindAsTexture();
-    }
-
-    @Override
-    public int getColorTextureId() {
-        return Renderer.getInstance().getMainPass().getColorAttachment().id;
+    public GpuTexture getColorTexture() {
+        return Renderer.getInstance().getMainPass().getColorAttachment();
     }
 }

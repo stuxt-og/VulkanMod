@@ -4,11 +4,8 @@ import com.mojang.blaze3d.platform.IconSet;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.VanillaPackResources;
 import net.vulkanmod.config.Platform;
-import net.vulkanmod.config.video.VideoModeManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,9 +18,8 @@ import java.io.IOException;
 public class MinecraftMixin {
 
     @Shadow @Final private Window window;
-    @Shadow @Final public Options options;
 
-    @Shadow @Final private VanillaPackResources vanillaPackResources;
+    @Shadow @Final private PackResources vanillaPackResources;
 
     /**
      * @author

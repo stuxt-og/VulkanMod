@@ -1,10 +1,9 @@
 package net.vulkanmod.render.chunk.build.light.data;
 
+import java.util.Arrays;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockAndTintGetter;
-
-import java.util.Arrays;
 
 /**
  * A light data cache which uses a flat-array to store the light data for the blocks in a given chunk and its direct
@@ -45,9 +44,9 @@ public class ArrayLightDataCache extends LightDataAccess {
     }
 
     public void reset(SectionPos origin) {
-        this.xOffset = origin.minBlockX() - NEIGHBOR_BLOCK_RADIUS;
-        this.yOffset = origin.minBlockY() - NEIGHBOR_BLOCK_RADIUS;
-        this.zOffset = origin.minBlockZ() - NEIGHBOR_BLOCK_RADIUS;
+        this.xOffset = origin.method_19527() - NEIGHBOR_BLOCK_RADIUS;
+        this.yOffset = origin.method_19528() - NEIGHBOR_BLOCK_RADIUS;
+        this.zOffset = origin.method_19529() - NEIGHBOR_BLOCK_RADIUS;
 
         Arrays.fill(this.light, 0);
     }

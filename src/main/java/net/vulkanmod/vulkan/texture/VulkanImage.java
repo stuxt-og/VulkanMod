@@ -275,6 +275,9 @@ public class VulkanImage {
     }
 
     public void updateTextureSampler(int maxLod, byte flags) {
+        if (this.name.contains("block"))
+            System.nanoTime();
+
         this.sampler = SamplerManager.getTextureSampler((byte) maxLod, flags);
     }
 

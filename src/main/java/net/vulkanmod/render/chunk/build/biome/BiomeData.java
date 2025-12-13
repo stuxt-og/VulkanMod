@@ -1,12 +1,14 @@
 package net.vulkanmod.render.chunk.build.biome;
 
-import net.minecraft.core.registries.Registries;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.LinearCongruentialGenerator;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.vulkanmod.render.util.MathUtil;
+import org.joml.Math;
 import net.vulkanmod.render.chunk.build.RenderRegion;
 import org.joml.Vector3f;
 
@@ -30,10 +32,10 @@ public class BiomeData {
         this.secZ = secZ;
     }
 
-    public void getBiomeData(Level level, LevelChunkSection chunkSection, int secX, int secY, int secZ) {
+    public void getBiomeData(ClientLevel level, LevelChunkSection chunkSection, int secX, int secY, int secZ) {
         Biome defaultValue = level.registryAccess()
-                                  .registryOrThrow(Registries.BIOME)
-                                  .getHolderOrThrow(Biomes.PLAINS)
+                                  .lookupOrThrow(Registries.BIOME)
+                                  .getOrThrow(Biomes.PLAINS)
                                   .value();
 
         int baseIdx = getRelativeSectionIdx(secX, secY, secZ);
@@ -91,7 +93,7 @@ public class BiomeData {
             int cellIdx = baseSectionIdx + getRelativeIdx(cellX & 3, cellY & 3, cellZ & 3);
 
             Vector3f offset = getOffset(baseSectionIdx, cellX, cellY, cellZ);
-            float distance = Mth.square(fCellX + offset.x()) + Mth.square(fCellY + offset.y()) + Mth.square(fCellZ + offset.z());
+            float distance = Mth.sqrt(fCellX + offset.x()) + Mth.sqrt(fCellY + offset.y()) + Math.sqrt(fCellZ + offset.z());
 
             if (closestDistance > distance) {
                 closestCellIdx = cellIdx;
@@ -138,7 +140,7 @@ public class BiomeData {
     }
 
     private static float getFiddle(long l) {
-        float d = Math.floorMod(l >> 24, 1024) * (1.0f / 1024.0f);
+        float d = MathUtil.floorMod(l >> 24, 1024) * (1.0f / 1024.0f);
         return (d - 0.5f) * 0.9f;
     }
 

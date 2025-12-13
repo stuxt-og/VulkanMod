@@ -1,9 +1,9 @@
 package net.vulkanmod.render.chunk.util;
 
-import net.minecraft.core.Direction;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import net.minecraft.core.Direction;
 
 public class Util {
 

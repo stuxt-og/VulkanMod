@@ -1,9 +1,9 @@
 package net.vulkanmod.mixin.vertex;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.core.Direction;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.vulkanmod.interfaces.ExtendedVertexBuilder;
 import net.vulkanmod.render.vertex.format.I32_SNorm;
 import org.joml.Matrix3f;
@@ -123,16 +123,16 @@ public class VertexMultiConsumersM {
             position.set(x, y , z, 1.0f);
 
             this.normalInversePose.transform(normal);
-            Direction direction = Direction.getNearest(normal.x(), normal.y(), normal.z());
+            Direction direction = Direction.method_10147(normal.x(), normal.y(), normal.z());
             this.cameraInversePose.transform(position);
             position.rotateY(3.1415927F);
             position.rotateX(-1.5707964F);
-            position.rotate(direction.getRotation());
+            position.rotate(direction.method_23224());
             float f = -position.x() * this.textureScale;
             float g = -position.y() * this.textureScale;
 
             final int color = 0xFFFFFFFF;
-            this.delegate.addVertex(x, y, z, color, f, g, overlay, light, nx, ny, nz);
+            this.delegate.method_23919(x, y, z, color, f, g, overlay, light, nx, ny, nz);
         }
     }
 }

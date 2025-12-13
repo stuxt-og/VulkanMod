@@ -58,11 +58,11 @@ public enum TerrainRenderType {
 
     public static RenderType getRenderType(TerrainRenderType renderType) {
         return switch (renderType) {
-            case SOLID -> RenderType.solid();
-            case CUTOUT -> RenderType.cutout();
-            case CUTOUT_MIPPED -> RenderType.cutoutMipped();
-            case TRANSLUCENT -> RenderType.translucent();
-            case TRIPWIRE -> RenderType.tripwire();
+            case SOLID -> RenderType.method_23577();
+            case CUTOUT -> RenderType.method_23581();
+            case CUTOUT_MIPPED -> RenderType.method_23579();
+            case TRANSLUCENT -> RenderType.method_23583();
+            case TRIPWIRE -> RenderType.method_29997();
         };
     }
 

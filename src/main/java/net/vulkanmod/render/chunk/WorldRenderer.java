@@ -1,27 +1,30 @@
 package net.vulkanmod.render.chunk;
 
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.util.profiling.Zone;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
-import net.minecraft.server.level.BlockDestructionProgress;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.level.BlockDestructionProgress;
+import org.joml.Math;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.core.SectionPos;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.render.PipelineManager;
 import net.vulkanmod.render.chunk.buffer.DrawBuffers;
@@ -136,6 +139,8 @@ public class WorldRenderer {
         Profiler profiler = Profiler.getMainProfiler();
         profiler.push("Setup_Renderer");
 
+        ProfilerFiller mcProfiler = net.minecraft.util.profiling.Profiler.get();
+
         benchCallback();
 
         this.cameraPos = camera.getPosition();
@@ -143,7 +148,7 @@ public class WorldRenderer {
             this.allChanged();
         }
 
-        this.level.getProfiler().push("camera");
+        mcProfiler.push("camera");
         float cameraX = (float) cameraPos.x();
         float cameraY = (float) cameraPos.y();
         float cameraZ = (float) cameraPos.z();
@@ -161,12 +166,11 @@ public class WorldRenderer {
         profiler.pop();
 
         double entityDistanceScaling = this.minecraft.options.entityDistanceScaling().get();
-        Entity.setViewScale(Mth.clamp((double) this.renderDistance / 8.0D, 1.0D, 2.5D) * entityDistanceScaling);
+        Entity.setViewScale(Math.clamp((double) this.renderDistance / 8.0D, 1.0D, 2.5D) * entityDistanceScaling);
 
-        this.level.getProfiler().popPush("cull");
-        this.minecraft.getProfiler().popPush("culling");
+        mcProfiler.popPush("cull");
 
-        this.minecraft.getProfiler().popPush("update");
+        mcProfiler.popPush("update");
 
         boolean cameraMoved = false;
         float d_xRot = Math.abs(camera.getXRot() - this.lastCamRotX);
@@ -194,12 +198,13 @@ public class WorldRenderer {
 
         this.indirectBuffers[Renderer.getCurrentFrame()].reset();
 
-        this.minecraft.getProfiler().pop();
+        mcProfiler.pop();
         profiler.pop();
     }
 
     public void uploadSections() {
-        this.minecraft.getProfiler().push("upload");
+        ProfilerFiller mcProfiler = net.minecraft.util.profiling.Profiler.get();
+        mcProfiler.push("upload");
 
         Profiler profiler = Profiler.getMainProfiler();
         profiler.push("Uploads");
@@ -214,7 +219,7 @@ public class WorldRenderer {
 
         profiler.pop();
 
-        this.minecraft.getProfiler().pop();
+        mcProfiler.pop();
     }
 
     public boolean isSectionCompiled(BlockPos blockPos) {
@@ -248,7 +253,7 @@ public class WorldRenderer {
 
             Entity entity = this.minecraft.getCameraEntity();
             if (entity != null) {
-                this.sectionGrid.repositionCamera(entity.getX(), entity.getZ());
+                this.sectionGrid.repositionCamera(entity.getX(), entity.getY());
             }
 
         }
@@ -292,13 +297,32 @@ public class WorldRenderer {
         TerrainRenderType terrainRenderType = TerrainRenderType.get(renderType);
         renderType.setupRenderState();
 
+        Renderer.getInstance().getMainPass().rebindMainTarget();
+
         this.sortTranslucentSections(camX, camY, camZ);
 
-        this.minecraft.getProfiler().push("filterempty");
-        this.minecraft.getProfiler().popPush(() -> "render_" + renderType);
+        ProfilerFiller mcProfiler = net.minecraft.util.profiling.Profiler.get();
+        Zone zone = mcProfiler.zone(() -> "render_" + renderType);
 
         final boolean isTranslucent = terrainRenderType == TerrainRenderType.TRANSLUCENT;
         final boolean indirectDraw = Initializer.CONFIG.indirectDraw;
+
+        if (!isTranslucent) {
+            GlStateManager._disableBlend();
+        } else {
+            GlStateManager._enableBlend();
+            VRenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        }
+
+        VRenderSystem.enableCull();
+        VRenderSystem.depthFunc(GL11.GL_LEQUAL);
+
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
+
+        GlStateManager._colorMask(true, true, true, true);
+        GlStateManager._disablePolygonOffset();
+        VRenderSystem.setPolygonModeGL(GL11.GL_FILL);
 
         VRenderSystem.applyMVP(modelView, projection);
         VRenderSystem.setPrimitiveTopologyGL(GL11.GL_TRIANGLES);
@@ -347,12 +371,13 @@ public class WorldRenderer {
             renderer.pushConstants(pipeline);
         }
 
-        this.minecraft.getProfiler().pop();
+        zone.close();
         renderType.clearRenderState();
     }
 
     private void sortTranslucentSections(double camX, double camY, double camZ) {
-        this.minecraft.getProfiler().push("translucent_sort");
+        ProfilerFiller mcProfiler = net.minecraft.util.profiling.Profiler.get();
+        mcProfiler.push("translucent_sort");
         double d0 = camX - this.xTransparentOld;
         double d1 = camY - this.yTransparentOld;
         double d2 = camZ - this.zTransparentOld;
@@ -374,7 +399,7 @@ public class WorldRenderer {
             }
         }
 
-        this.minecraft.getProfiler().pop();
+        mcProfiler.pop();
     }
 
     public void renderBlockEntities(PoseStack poseStack, double camX, double camY, double camZ,

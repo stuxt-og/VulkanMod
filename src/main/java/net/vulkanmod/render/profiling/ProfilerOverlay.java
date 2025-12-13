@@ -1,9 +1,6 @@
 package net.vulkanmod.render.profiling;
 
 import com.google.common.base.Strings;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +9,7 @@ import net.vulkanmod.config.gui.GuiRenderer;
 import net.vulkanmod.render.chunk.WorldRenderer;
 import net.vulkanmod.render.chunk.build.task.ChunkTask;
 import net.vulkanmod.render.chunk.build.thread.BuilderResources;
+import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.memory.MemoryManager;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
@@ -67,7 +65,7 @@ public class ProfilerOverlay {
 
         Objects.requireNonNull(this.font);
 
-        RenderSystem.enableBlend();
+        VRenderSystem.enableBlend();
         GuiRenderer.beginBatch();
 
         for (int i = 0; i < infoList.size(); ++i) {
@@ -83,7 +81,7 @@ public class ProfilerOverlay {
         }
 
         GuiRenderer.endBatch();
-        RenderSystem.disableBlend();
+        VRenderSystem.disableBlend();
 
         for (int i = 0; i < infoList.size(); ++i) {
             String line = infoList.get(i);

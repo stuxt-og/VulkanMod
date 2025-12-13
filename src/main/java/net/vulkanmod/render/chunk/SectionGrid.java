@@ -1,10 +1,12 @@
 package net.vulkanmod.render.chunk;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
+import net.vulkanmod.render.util.MathUtil;
+import org.joml.Math;
 import net.vulkanmod.render.chunk.frustum.VFrustum;
 import net.vulkanmod.render.chunk.graph.GraphDirections;
 import net.vulkanmod.render.chunk.util.CircularIntList;
@@ -14,7 +16,7 @@ import java.util.List;
 
 public class SectionGrid {
 
-    protected final Level level;
+    protected final ClientLevel level;
     protected int gridHeight;
     protected int gridWidth;
     public RenderSection[] sections;
@@ -27,11 +29,11 @@ public class SectionGrid {
     private final CircularIntList zList;
     private final CircularIntList.RangeIterator xComplIterator;
 
-    public SectionGrid(Level level, int viewDistance) {
+    public SectionGrid(ClientLevel level, int viewDistance) {
         this.level = level;
         this.setViewDistance(viewDistance);
         this.createChunks();
-        this.chunkAreaManager = new ChunkAreaManager(this.gridWidth, this.gridHeight, this.level.getMinBuildHeight());
+        this.chunkAreaManager = new ChunkAreaManager(this.gridWidth, this.gridHeight, this.level.getMinY());
 
         this.prevSecX = Integer.MIN_VALUE;
         this.prevSecZ = Integer.MIN_VALUE;
@@ -90,9 +92,9 @@ public class SectionGrid {
         int dz = Mth.clamp(secZ - this.prevSecZ, -this.gridWidth, this.gridWidth);
 
         int xAbsChunkIndex = secX - this.gridWidth / 2;
-        int xStart = Math.floorMod(xAbsChunkIndex, this.gridWidth); // needs positive modulo
+        int xStart = MathUtil.floorMod(xAbsChunkIndex, this.gridWidth); // needs positive modulo
         int zAbsChunkIndex = secZ - this.gridWidth / 2;
-        int zStart = Math.floorMod(zAbsChunkIndex, this.gridWidth);
+        int zStart = MathUtil.floorMod(zAbsChunkIndex, this.gridWidth);
 
         CircularIntList xList = this.xList;
         CircularIntList zList = this.zList;
@@ -180,7 +182,7 @@ public class SectionGrid {
                              CircularIntList xList, CircularIntList zList,
                              int xCurrentIdx, int zCurrentIdx) {
 
-        int y1 = this.level.getMinBuildHeight() + (yRel << 4);
+        int y1 = this.level.getMinY() + (yRel << 4);
         RenderSection renderSection = this.sections[this.getChunkIndex(xRelativeIndex, yRel, zRelativeIndex)];
 
         this.unsetNeighbours(renderSection);
@@ -280,9 +282,9 @@ public class SectionGrid {
     }
 
     public void setDirty(int sectionX, int sectionY, int sectionZ, boolean playerChanged) {
-        int i = Math.floorMod(sectionX, this.gridWidth);
-        int j = Math.floorMod(sectionY - this.level.getMinSection(), this.gridHeight);
-        int k = Math.floorMod(sectionZ, this.gridWidth);
+        int i = MathUtil.floorMod(sectionX, this.gridWidth);
+        int j = MathUtil.floorMod(sectionY - this.level.getMinSectionY(), this.gridHeight);
+        int k = MathUtil.floorMod(sectionZ, this.gridWidth);
         RenderSection renderSection = this.sections[this.getChunkIndex(i, j, k)];
         renderSection.setDirty(playerChanged);
     }
@@ -294,7 +296,7 @@ public class SectionGrid {
 
     public RenderSection getSectionAtBlockPos(int x, int y, int z) {
         int i = x >> 4;
-        int j = (y - this.level.getMinBuildHeight()) >> 4;
+        int j = (y - this.level.getMinY()) >> 4;
         int k = z >> 4;
 
         return this.getSectionAtSectionPos(i, j, k);
@@ -302,8 +304,8 @@ public class SectionGrid {
 
     public RenderSection getSectionAtSectionPos(int i, int j, int k) {
         if (j >= 0 && j < this.gridHeight) {
-            i = Math.floorMod(i, this.gridWidth);
-            k = Math.floorMod(k, this.gridWidth);
+            i = MathUtil.floorMod(i, this.gridWidth);
+            k = MathUtil.floorMod(k, this.gridWidth);
             return this.sections[this.getChunkIndex(i, j, k)];
         } else {
             return null;
@@ -313,8 +315,8 @@ public class SectionGrid {
     public List<RenderSection> getRenderSectionsAt(int x, int z) {
         ObjectArrayList<RenderSection> list = new ObjectArrayList<>(24);
 
-        int i = Math.floorMod(x, this.gridWidth);
-        int k = Math.floorMod(z, this.gridWidth);
+        int i = MathUtil.floorMod(x, this.gridWidth);
+        int k = MathUtil.floorMod(z, this.gridWidth);
 
         for (int y1 = 0; y1 < gridHeight; ++y1) {
             list.add(this.sections[this.getChunkIndex(i, y1, k)]);

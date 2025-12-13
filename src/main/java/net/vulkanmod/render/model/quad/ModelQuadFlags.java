@@ -82,6 +82,4 @@ public class ModelQuadFlags {
 
         return flags;
     }
-
-
 }

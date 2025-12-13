@@ -10,7 +10,6 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class GuiElement implements GuiEventListener, NarratableEntry {
-
     protected int width;
     protected int height;
     public int x;

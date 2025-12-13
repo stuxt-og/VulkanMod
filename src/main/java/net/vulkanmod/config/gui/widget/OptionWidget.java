@@ -1,27 +1,16 @@
 package net.vulkanmod.config.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
-import net.vulkanmod.config.gui.GuiElement;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.vulkanmod.config.gui.GuiRenderer;
-import net.vulkanmod.config.option.CyclingOption;
 import net.vulkanmod.config.option.Option;
-import net.vulkanmod.render.util.MathUtil;
 import net.vulkanmod.vulkan.util.ColorUtil;
-
-import java.util.Objects;
 
 public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
         implements NarratableEntry {
@@ -69,12 +58,12 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
     public void renderWidget(double mouseX, double mouseY) {
         Minecraft minecraftClient = Minecraft.getInstance();
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+//        RenderSystem.setShader(CoreShaders.POSITION_TEX);
+//        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.getYImage(this.isHovered());
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
+//        RenderSystem.enableBlend();
+//        RenderSystem.defaultBlendFunc();
+//        RenderSystem.enableDepthTest();
 
         int xPadding = 0;
         int yPadding = 0;
@@ -90,7 +79,7 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
         Font textRenderer = minecraftClient.font;
         GuiRenderer.drawString(textRenderer, this.getName().getVisualOrderText(), this.x + 8, this.y + (this.height - 8) / 2, color);
 
-        RenderSystem.enableBlend();
+//        RenderSystem.enableBlend();
 
         this.renderControls(mouseX, mouseY);
     }
@@ -206,5 +195,4 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
     public void playDownSound(SoundManager soundManager) {
         soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
     }
-
 }

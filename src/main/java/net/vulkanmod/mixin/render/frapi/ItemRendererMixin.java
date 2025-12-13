@@ -16,38 +16,23 @@
 
 package net.vulkanmod.mixin.render.frapi;
 
-import net.vulkanmod.render.chunk.build.frapi.render.ItemRenderContext;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.class_918;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import com.mojang.blaze3d.vertex.PoseStack;
+@Mixin(class_918.class)
+abstract class ItemRendererMixin {
+//    @Unique
+//    private static final ThreadLocal<ItemRenderContext> CONTEXTS = ThreadLocal.withInitial(ItemRenderContext::new);
 
-@Mixin(ItemRenderer.class)
-public abstract class ItemRendererMixin {
-    @Final
-    @Shadow
-    private ItemColors itemColors;
-
-    @Unique
-    private final ThreadLocal<ItemRenderContext> fabric_contexts = ThreadLocal.withInitial(() -> new ItemRenderContext(itemColors));
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/BakedModel;isCustomRenderer()Z"), method = "render", cancellable = true)
-    public void hook_renderItem(ItemStack stack, ItemDisplayContext transformMode, boolean invert, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, int overlay, BakedModel model, CallbackInfo ci) {
-        if (!model.isVanillaAdapter()) {
-            fabric_contexts.get().renderModel(stack, transformMode, invert, matrixStack, vertexConsumerProvider, light, overlay, model);
-            matrixStack.popPose();
-            ci.cancel();
-        }
-    }
+    // TODO: frapi
+//    @Inject(method = "renderItem", at = @At(value = "HEAD"), cancellable = true)
+//    private static void hookRenderItem(ItemDisplayContext itemDisplayContext, PoseStack poseStack,
+//                                       MultiBufferSource multiBufferSource, int i, int j, int[] is,
+//                                       List<BakedQuad> list, RenderType renderType,
+//                                       ItemStackRenderState.FoilType foilType, CallbackInfo ci) {
+//        if (!model.isVanillaAdapter()) {
+//            CONTEXTS.get().renderModel(itemDisplayContext, poseStack, multiBufferSource, i, j, is, model, renderType, foilType);
+//            ci.cancel();
+//        }
+//    }
 }

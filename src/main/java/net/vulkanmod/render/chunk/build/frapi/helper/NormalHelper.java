@@ -22,8 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
+import net.minecraft.class_2382;
+import org.joml.Math;
 
 /**
  * Static routines of general utility for renderer implementations.
@@ -42,10 +42,10 @@ public abstract class NormalHelper {
 	 * The extra value is for use by shaders.
 	 */
 	public static int packNormal(float x, float y, float z, float w) {
-		x = Mth.clamp(x, -1, 1);
-		y = Mth.clamp(y, -1, 1);
-		z = Mth.clamp(z, -1, 1);
-		w = Mth.clamp(w, -1, 1);
+		x = Math.clamp(x, -1, 1);
+		y = Math.clamp(y, -1, 1);
+		z = Math.clamp(z, -1, 1);
+		w = Math.clamp(w, -1, 1);
 
 		return ((int) (x * PACK) & 0xFF) | (((int) (y * PACK) & 0xFF) << 8) | (((int) (z * PACK) & 0xFF) << 16) | (((int) (w * PACK) & 0xFF) << 24);
 	}
@@ -61,9 +61,9 @@ public abstract class NormalHelper {
 	 * Like {@link #packNormal(float, float, float, float)}, but without a {@code w} value.
 	 */
 	public static int packNormal(float x, float y, float z) {
-		x = Mth.clamp(x, -1, 1);
-		y = Mth.clamp(y, -1, 1);
-		z = Mth.clamp(z, -1, 1);
+		x = Math.clamp(x, -1, 1);
+		y = Math.clamp(y, -1, 1);
+		z = Math.clamp(z, -1, 1);
 
 		return ((int) (x * PACK) & 0xFF) | (((int) (y * PACK) & 0xFF) << 8) | (((int) (z * PACK) & 0xFF) << 16);
 	}
@@ -107,7 +107,7 @@ public abstract class NormalHelper {
 		final Direction nominalFace = q.nominalFace();
 
 		if (nominalFace != null && GeometryHelper.isQuadParallelToFace(nominalFace, q)) {
-			Vec3i vec = nominalFace.getNormal();
+			class_2382 vec = nominalFace.method_62675();
 			saveTo.set(vec.getX(), vec.getY(), vec.getZ());
 			return;
 		}
@@ -184,7 +184,7 @@ public abstract class NormalHelper {
 	}
 
 	public static int packedNormalFromDirection(Direction direction) {
-		Vec3i normal = direction.getNormal();
+		class_2382 normal = direction.method_62675();
 
 		return I32_SNorm.packNormal(normal.getX(), normal.getY(), normal.getZ());
 	}

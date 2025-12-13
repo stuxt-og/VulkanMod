@@ -1,6 +1,6 @@
 package net.vulkanmod.render.chunk;
 
-import net.minecraft.util.Mth;
+import org.joml.Math;
 import net.vulkanmod.render.chunk.buffer.DrawBuffers;
 import net.vulkanmod.render.chunk.frustum.FrustumOctree;
 import net.vulkanmod.render.chunk.frustum.VFrustum;
@@ -75,13 +75,13 @@ public class ChunkAreaManager {
         int xS = secX >> AREA_SH_XZ;
         int zS = secZ >> AREA_SH_XZ;
 
-        int deltaX = Mth.clamp(xS - this.prevX, -this.xzSize, this.xzSize);
-        int deltaZ = Mth.clamp(zS - this.prevZ, -this.xzSize, this.xzSize);
+        int deltaX = Math.clamp(xS - this.prevX, -this.xzSize, this.xzSize);
+        int deltaZ = Math.clamp(zS - this.prevZ, -this.xzSize, this.xzSize);
 
         int xAbsChunkIndex = xS - this.xzSize / 2;
-        int xStart = Math.floorMod(xAbsChunkIndex, this.xzSize); // needs positive modulo
+        int xStart = MathUtil.floorMod(xAbsChunkIndex, this.xzSize); // needs positive modulo
         int zAbsChunkIndex = zS - this.xzSize / 2;
-        int zStart = Math.floorMod(zAbsChunkIndex, this.xzSize);
+        int zStart = MathUtil.floorMod(zAbsChunkIndex, this.xzSize);
 
         CircularIntList xList = this.xList;
         CircularIntList zList = this.zList;
@@ -181,8 +181,8 @@ public class ChunkAreaManager {
         int AreaY = (y - this.minHeight) >> shY;
         int AreaZ = z >> shZ;
 
-        int x1 = Math.floorMod(AreaX, this.xzSize);
-        int z1 = Math.floorMod(AreaZ, this.xzSize);
+        int x1 = MathUtil.floorMod(AreaX, this.xzSize);
+        int z1 = MathUtil.floorMod(AreaZ, this.xzSize);
 
         chunkArea = this.chunkAreasArr[this.getAreaIndex(x1, AreaY, z1)];
 

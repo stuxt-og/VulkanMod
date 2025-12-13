@@ -17,28 +17,28 @@
 package net.vulkanmod.render.chunk.build.frapi.mesh;
 
 import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import org.jetbrains.annotations.Nullable;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.minecraft.core.Direction;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import org.joml.Math;
 import net.vulkanmod.render.chunk.build.frapi.helper.GeometryHelper;
 import net.vulkanmod.render.chunk.build.frapi.material.MaterialViewImpl;
 import net.vulkanmod.render.chunk.build.frapi.material.RenderMaterialImpl;
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 
 /**
  * Holds all the array offsets and bit-wise encoders/decoders for
  * packing/unpacking quad data in an array of integers.
  * All of this is implementation-specific - that's why it isn't a "helper" class.
  */
-public abstract class EncodingFormat {
+public final class EncodingFormat {
 	private EncodingFormat() { }
 
 	static final int HEADER_BITS = 0;
 	static final int HEADER_FACE_NORMAL = 1;
-	static final int HEADER_COLOR_INDEX = 2;
+	static final int HEADER_TINT_INDEX = 2;
 	static final int HEADER_TAG = 3;
 	public static final int HEADER_STRIDE = 4;
 
@@ -57,7 +57,7 @@ public abstract class EncodingFormat {
 	public static final int TOTAL_STRIDE;
 
 	static {
-		final VertexFormat format = DefaultVertexFormat.BLOCK;
+		final VertexFormat format = DefaultVertexFormat.field_1590;
 		VERTEX_X = HEADER_STRIDE + 0;
 		VERTEX_Y = HEADER_STRIDE + 1;
 		VERTEX_Z = HEADER_STRIDE + 2;
@@ -81,8 +81,8 @@ public abstract class EncodingFormat {
 	private static final int DIRECTION_COUNT = Direction.values().length;
 	private static final int NULLABLE_DIRECTION_COUNT = DIRECTION_COUNT + 1;
 
-	private static final int CULL_BIT_LENGTH = Mth.ceillog2(NULLABLE_DIRECTION_COUNT);
-	private static final int LIGHT_BIT_LENGTH = Mth.ceillog2(DIRECTION_COUNT);
+	private static final int CULL_BIT_LENGTH = Math.method_15342(NULLABLE_DIRECTION_COUNT);
+	private static final int LIGHT_BIT_LENGTH = Math.method_15342(DIRECTION_COUNT);
 	private static final int NORMALS_BIT_LENGTH = 4;
 	private static final int GEOMETRY_BIT_LENGTH = GeometryHelper.FLAG_BIT_COUNT;
 	private static final int MATERIAL_BIT_LENGTH = MaterialViewImpl.TOTAL_BIT_LENGTH;

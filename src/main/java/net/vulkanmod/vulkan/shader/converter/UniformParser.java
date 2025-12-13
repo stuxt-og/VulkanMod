@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor;
 import net.vulkanmod.vulkan.shader.descriptor.UBO;
 import net.vulkanmod.vulkan.shader.layout.AlignedStruct;
+import net.vulkanmod.vulkan.texture.VTextureSelector;
 import org.lwjgl.vulkan.VK11;
 
 import java.util.ArrayList;
@@ -72,12 +73,14 @@ public class UniformParser {
     public String createUniformsCode() {
         StringBuilder builder = new StringBuilder();
 
-        //hardcoded 0 binding as it should always be 0 in this case
-        builder.append(String.format("layout(binding = %d) uniform UniformBufferObject {\n", 0));
-        for (Uniform uniform : this.globalUniforms) {
-            builder.append(String.format("%s %s;\n", uniform.type, uniform.name));
+        if (!this.globalUniforms.isEmpty()) {
+            // hardcoded 0 binding
+            builder.append(String.format("layout(binding = %d) uniform UniformBufferObject {\n", 0));
+            for (Uniform uniform : this.globalUniforms) {
+                builder.append(String.format("%s %s;\n", uniform.type, uniform.name));
+            }
+            builder.append("};\n\n");
         }
-        builder.append("};\n\n");
 
         return builder.toString();
     }
@@ -97,6 +100,10 @@ public class UniformParser {
     }
 
     public UBO createUBO() {
+        if (this.globalUniforms.isEmpty()) {
+            return null;
+        }
+
         AlignedStruct.Builder builder = new AlignedStruct.Builder();
 
         for (UniformParser.Uniform uniform : this.globalUniforms) {
@@ -113,13 +120,20 @@ public class UniformParser {
     }
 
     private List<ImageDescriptor> createSamplerList() {
-        int currentLocation = 1;
+        int offset = this.globalUniforms.isEmpty() ? 0 : 1;
+        int currentLocation = offset;
 
         List<ImageDescriptor> imageDescriptors = new ObjectArrayList<>();
 
         for (StageUniforms stageUniforms : this.stageUniforms) {
             for (Uniform uniform : stageUniforms.samplers) {
-                int imageIdx = currentLocation - 1;
+//                int imageIdx = currentLocation - offset;
+                int imageIdx = VTextureSelector.getTextureIdx(uniform.name);
+
+                if (imageIdx == -1) {
+                    imageIdx = currentLocation - offset;
+                }
+
                 imageDescriptors.add(new ImageDescriptor(currentLocation, uniform.type, uniform.name, imageIdx));
                 currentLocation++;
             }

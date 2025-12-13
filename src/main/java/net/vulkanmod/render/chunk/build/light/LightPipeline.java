@@ -1,8 +1,8 @@
 package net.vulkanmod.render.chunk.build.light;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.vulkanmod.render.model.quad.ModelQuadView;
+import net.minecraft.core.Direction;
 import net.vulkanmod.render.chunk.build.light.data.QuadLightData;
 
 /**

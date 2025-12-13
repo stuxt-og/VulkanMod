@@ -1,7 +1,11 @@
 package net.vulkanmod.mixin.window;
 
-import com.mojang.blaze3d.platform.*;
+import com.mojang.blaze3d.TracyFrameCapture;
+import com.mojang.blaze3d.platform.DisplayData;
+import com.mojang.blaze3d.platform.ScreenManager;
+import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.Window;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.config.Config;
 import net.vulkanmod.config.Platform;
@@ -12,6 +16,7 @@ import net.vulkanmod.config.video.WindowMode;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.Vulkan;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GLCapabilities;
 import org.slf4j.Logger;
@@ -31,8 +36,6 @@ public abstract class WindowMixin {
     @Final @Shadow private long window;
 
     @Shadow private boolean vsync;
-
-    @Shadow protected abstract void updateFullscreen(boolean bl);
 
     @Shadow private boolean fullscreen;
 
@@ -54,25 +57,10 @@ public abstract class WindowMixin {
 
     @Shadow public abstract int getHeight();
 
+    @Shadow protected abstract void updateFullscreen(boolean bl, @Nullable TracyFrameCapture tracyFrameCapture);
+
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V"))
     private void redirect(int hint, int value) { }
-
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwMakeContextCurrent(J)V"))
-    private void redirect2(long window) { }
-
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL;createCapabilities()Lorg/lwjgl/opengl/GLCapabilities;"))
-    private GLCapabilities redirect2() {
-        return null;
-    }
-
-    // Vulkan device not initialized yet
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;maxSupportedTextureSize()I"))
-    private int redirect3() {
-        return 0;
-    }
-
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSetWindowSizeLimits(JIIII)V"))
-    private void redirect4(long window, int minwidth, int minheight, int maxwidth, int maxheight) { }
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
     private void vulkanHint(WindowEventHandler windowEventHandler, ScreenManager screenManager, DisplayData displayData, String string, String string2, CallbackInfo ci) {
@@ -110,12 +98,17 @@ public abstract class WindowMixin {
      * @author
      */
     @Overwrite
-    public void updateDisplay() {
-        RenderSystem.flipFrame(this.window);
+    public void updateDisplay(@Nullable TracyFrameCapture tracyFrameCapture) {
+        RenderSystem.flipFrame(this.window, tracyFrameCapture);
+
+//        if (this.fullscreen != this.actuallyFullscreen) {
+//            this.actuallyFullscreen = this.fullscreen;
+//            this.updateFullscreen(this.vsync, tracyFrameCapture);
+//        }
 
         if (Options.fullscreenDirty) {
             Options.fullscreenDirty = false;
-            this.updateFullscreen(this.vsync);
+            this.updateFullscreen(this.vsync, tracyFrameCapture);
         }
     }
 

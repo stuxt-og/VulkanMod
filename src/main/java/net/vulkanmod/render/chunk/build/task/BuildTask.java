@@ -1,14 +1,14 @@
 package net.vulkanmod.render.chunk.build.task;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.Minecraft;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.render.chunk.RenderSection;
 import net.vulkanmod.render.chunk.WorldRenderer;
@@ -104,7 +104,7 @@ public class BuildTask extends ChunkTask {
                     blockPos.set(section.xOffset() + x, section.yOffset() + y, section.zOffset() + z);
 
                     BlockState blockState = this.region.getBlockState(blockPos);
-                    if (blockState.isSolidRender(this.region, blockPos)) {
+                    if (blockState.isSolidRender()) {
                         visGraph.setOpaque(blockPos);
                     }
 
@@ -188,6 +188,5 @@ public class BuildTask extends ChunkTask {
                 compileResult.globalBlockEntities.add(blockEntity);
             }
         }
-
     }
 }

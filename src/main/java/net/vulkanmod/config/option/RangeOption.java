@@ -1,7 +1,7 @@
 package net.vulkanmod.config.option;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import org.joml.Math;
 import net.vulkanmod.config.gui.widget.OptionWidget;
 import net.vulkanmod.config.gui.widget.RangeOptionWidget;
 
@@ -22,7 +22,7 @@ public class RangeOption extends Option<Integer> {
     }
 
     public RangeOption(Component name, int min, int max, int step, Consumer<Integer> setter, Supplier<Integer> getter) {
-        this(name, min, max, step, (i) -> Component.literal(String.valueOf(i)), setter, getter);
+        this(name, min, max, step, (i) -> Component.method_43470(String.valueOf(i)), setter, getter);
     }
 
     public OptionWidget<?> createOptionWidget(int x, int y, int width, int height) {
@@ -40,7 +40,7 @@ public class RangeOption extends Option<Integer> {
     }
 
     public void setValue(float f) {
-        double n = Mth.lerp(f, min, max);
+        double n = Math.lerp(f, min, max);
 
         n = this.step * Math.round(n / this.step);
 

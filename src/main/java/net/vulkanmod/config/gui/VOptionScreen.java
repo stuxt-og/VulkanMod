@@ -1,20 +1,21 @@
 package net.vulkanmod.config.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.util.FormattedCharSequence;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.config.gui.widget.VAbstractWidget;
 import net.vulkanmod.config.gui.widget.VButtonWidget;
 import net.vulkanmod.config.option.OptionPage;
 import net.vulkanmod.config.option.Options;
+import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
 import java.util.ArrayList;
@@ -231,7 +232,7 @@ public class VOptionScreen extends Screen {
             this.renderPanorama(guiGraphics, f);
         }
 
-        this.renderBlurredBackground(f);
+        this.clearFocus();
         this.renderMenuBackground(guiGraphics);
 
     }
@@ -243,11 +244,12 @@ public class VOptionScreen extends Screen {
         GuiRenderer.guiGraphics = guiGraphics;
         GuiRenderer.setPoseStack(guiGraphics.pose());
 
-        RenderSystem.enableBlend();
+        VRenderSystem.enableBlend();
 
         int size = minecraft.font.lineHeight * 4;
 
-        guiGraphics.blit(ICON, 30, 4, 0f, 0f, size, size, size, size);
+        guiGraphics.blit(RenderType::guiTextured, ICON, 30, 4, 0f, 0f, size, size, size, size);
+        guiGraphics.flush();
 
         VOptionList currentList = this.optionPages.get(this.currentListIdx).getOptionList();
         currentList.updateState(mouseX, mouseY);

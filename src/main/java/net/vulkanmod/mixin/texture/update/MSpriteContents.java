@@ -1,6 +1,7 @@
 package net.vulkanmod.mixin.texture.update;
 
-import net.minecraft.client.renderer.texture.SpriteContents;
+import com.mojang.blaze3d.textures.GpuTexture;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher4;
 import net.vulkanmod.render.texture.SpriteUpdateUtil;
 import net.vulkanmod.vulkan.texture.VTextureSelector;
 import org.spongepowered.asm.mixin.Final;
@@ -10,21 +11,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(SpriteContents.Ticker.class)
+@Mixin(BlockRenderDispatcher4.BlockRenderDispatcher5.class)
 public class MSpriteContents {
 
     @Shadow int subFrame;
     @Shadow int frame;
-    @Shadow @Final SpriteContents.AnimatedTexture animationInfo;
+    @Shadow @Final BlockRenderDispatcher4.class_5790 animationInfo;
 
     @Inject(method = "tickAndUpload", at = @At("HEAD"), cancellable = true)
-    private void checkUpload(int i, int j, CallbackInfo ci) {
+    private void checkUpload(int i, int j, GpuTexture gpuTexture, CallbackInfo ci) {
         if (!SpriteUpdateUtil.doUploadFrame()) {
             // Update animations frames even if no upload is scheduled
             ++this.subFrame;
-            SpriteContents.FrameInfo frameInfo = this.animationInfo.frames.get(this.frame);
-            if (this.subFrame >= frameInfo.time) {
-                this.frame = (this.frame + 1) % this.animationInfo.frames.size();
+            BlockRenderDispatcher4.class_5791 frameInfo = this.animationInfo.field_28472.get(this.frame);
+            if (this.subFrame >= frameInfo.comp_3446) {
+                this.frame = (this.frame + 1) % this.animationInfo.field_28472.size();
                 this.subFrame = 0;
             }
 

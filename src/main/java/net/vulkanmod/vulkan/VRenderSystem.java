@@ -1,7 +1,6 @@
 package net.vulkanmod.vulkan;
 
 import com.mojang.blaze3d.platform.Window;
-
 import net.minecraft.client.Minecraft;
 import net.vulkanmod.vulkan.device.DeviceManager;
 import net.vulkanmod.vulkan.shader.PipelineState;
@@ -61,6 +60,8 @@ public abstract class VRenderSystem {
 
     public static void initRenderer() {
         Vulkan.initVulkan(window);
+
+        setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     public static MappedBuffer getScreenSize() {
@@ -71,8 +72,8 @@ public abstract class VRenderSystem {
     public static void updateScreenSize() {
         Window window = Minecraft.getInstance().getWindow();
 
-        screenSize.putFloat(0, (float) window.getWidth());
-        screenSize.putFloat(4, (float) window.getHeight());
+        screenSize.putFloat(0, (float) window.method_4489());
+        screenSize.putFloat(4, (float) window.method_4506());
     }
 
     public static void setWindow(long window) {

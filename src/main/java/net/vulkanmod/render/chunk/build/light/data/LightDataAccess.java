@@ -1,12 +1,12 @@
 package net.vulkanmod.render.chunk.build.light.data;
 
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.interfaces.VoxelShapeExtended;
 import net.vulkanmod.render.chunk.build.light.LightMode;
@@ -88,9 +88,9 @@ public abstract class LightDataAccess {
         if (this.subBlockLighting)
             op = state.canOcclude();
         else
-            op = state.isViewBlocking(region, pos) && state.getLightBlock(region, pos) != 0;
+            op = state.isViewBlocking(region, pos) && state.getLightBlock() != 0;
 
-        boolean fo = state.isSolidRender(region, pos);
+        boolean fo = state.isSolidRender();
         boolean fc = state.isCollisionShapeFullBlock(region, pos);
 
         int lu = state.getLightEmission();
@@ -108,7 +108,7 @@ public abstract class LightDataAccess {
                 sl = region.getBrightness(LightLayer.SKY, pos);
             }
             else {
-                int light = LevelRenderer.getLightColor(region, state, pos);
+                int light = LevelRenderer.getLightColor(LevelRenderer.BrightnessGetter.DEFAULT, region, state, pos);
                 bl = LightTexture.block(light);
                 sl = LightTexture.sky(light);
             }
@@ -217,8 +217,7 @@ public abstract class LightDataAccess {
     public static int getEmissiveLightmap(int word) {
         if (unpackEM(word)) {
             return LightTexture.FULL_BRIGHT;
-        }
-        else {
+        } else {
             return getLightmap(word);
         }
     }

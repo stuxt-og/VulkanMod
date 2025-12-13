@@ -1,8 +1,11 @@
 package net.vulkanmod.vulkan.pass;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
+import net.minecraft.class_276;
 import net.minecraft.client.Minecraft;
-import net.vulkanmod.gl.VkGlTexture;
+import net.vulkanmod.render.engine.VkGpuDevice;
+import net.vulkanmod.render.engine.VkGpuTexture;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.framebuffer.Framebuffer;
 import net.vulkanmod.vulkan.framebuffer.RenderPass;
@@ -23,16 +26,16 @@ public class DefaultMainPass implements MainPass {
         return new DefaultMainPass();
     }
 
-    private RenderTarget mainTarget;
+    private class_276 mainTarget;
     private final Framebuffer mainFramebuffer;
 
     private RenderPass mainRenderPass;
     private RenderPass auxRenderPass;
 
-    private VkGlTexture[] colorAttachmentTextures;
+    private GpuTexture[] colorAttachmentTextures;
 
     DefaultMainPass() {
-        this.mainTarget = Minecraft.getInstance().getMainRenderTarget();
+        this.mainTarget = Minecraft.getInstance().method_1522();
         this.mainFramebuffer = Renderer.getInstance().getSwapChain();
 
         createRenderPasses();
@@ -133,22 +136,21 @@ public class DefaultMainPass implements MainPass {
     }
 
     @Override
-    public VkGlTexture getColorAttachment() {
+    public GpuTexture getColorAttachment() {
         return this.colorAttachmentTextures[Renderer.getCurrentImage()];
     }
 
     private void createSwapChainTextures() {
+        VkGpuDevice device = (VkGpuDevice) RenderSystem.getDevice();
+
         SwapChain swapChain = Renderer.getInstance().getSwapChain();
         var swapChainImages = swapChain.getImages();
         int imageCount = swapChainImages.size();
-        this.colorAttachmentTextures = new VkGlTexture[imageCount];
+        this.colorAttachmentTextures = new GpuTexture[imageCount];
 
-        for (int i = 0; i < swapChainImages.size(); i++) {
-            int id = VkGlTexture.genTextureId();
-            VkGlTexture glTexture = VkGlTexture.getTexture(id);
-            VkGlTexture.bindIdToImage(id, swapChainImages.get(i));
-            this.colorAttachmentTextures[i] = glTexture;
+        for (int i = 0; i < imageCount; ++i) {
+            VkGpuTexture attachmentTexture = device.gpuTextureFromVulkanImage(swapChainImages.get(i));
+            this.colorAttachmentTextures[i] = attachmentTexture;
         }
     }
-
 }

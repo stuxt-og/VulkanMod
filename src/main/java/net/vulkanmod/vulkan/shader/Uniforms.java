@@ -3,6 +3,7 @@ package net.vulkanmod.vulkan.shader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import net.vulkanmod.vulkan.VRenderSystem;
+import net.vulkanmod.vulkan.shader.layout.Uniform;
 import net.vulkanmod.vulkan.util.MappedBuffer;
 
 import java.util.function.Supplier;
@@ -28,11 +29,11 @@ public class Uniforms {
 
         //Vec1i
         vec1i_uniformMap.put("EndPortalLayers", () -> 15);
-        vec1i_uniformMap.put("FogShape", () -> RenderSystem.getShaderFogShape().getIndex());
+        vec1i_uniformMap.put("FogShape", () -> RenderSystem.getShaderFog().comp_3011().method_40036());
 
         //Vec1
-        vec1f_uniformMap.put("FogStart", RenderSystem::getShaderFogStart);
-        vec1f_uniformMap.put("FogEnd", RenderSystem::getShaderFogEnd);
+        vec1f_uniformMap.put("FogStart", () -> RenderSystem.getShaderFog().comp_3009());
+        vec1f_uniformMap.put("FogEnd", () -> RenderSystem.getShaderFog().comp_3010());
         vec1f_uniformMap.put("LineWidth", RenderSystem::getShaderLineWidth);
         vec1f_uniformMap.put("GameTime", RenderSystem::getShaderGameTime);
         vec1f_uniformMap.put("GlintAlpha", RenderSystem::getShaderGlintAlpha);
@@ -45,6 +46,7 @@ public class Uniforms {
         vec3f_uniformMap.put("Light0_Direction", () -> VRenderSystem.lightDirection0);
         vec3f_uniformMap.put("Light1_Direction", () -> VRenderSystem.lightDirection1);
         vec3f_uniformMap.put("ModelOffset", () -> VRenderSystem.modelOffset);
+        vec3f_uniformMap.put("ChunkOffset", () -> VRenderSystem.modelOffset);
 
         //Vec4
         vec4f_uniformMap.put("ColorModulator", VRenderSystem::getShaderColor);
